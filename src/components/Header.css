@@ -1,10 +1,23 @@
-/* Header Component Styles */
+/* Header Component Styles - Editorial Masthead */
 
 .header {
   background: var(--color-card);
-  border-bottom: 1px solid var(--color-border);
-  padding: var(--spacing-lg) 0;
-  box-shadow: var(--shadow-sm);
+  border-bottom: 3px solid var(--color-accent);
+  padding: var(--spacing-xl) 0 var(--spacing-lg) 0;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative accent bar */
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--gradient-accent);
 }
 
 .header-container {
@@ -12,39 +25,88 @@
   margin: 0 auto;
   padding: 0 var(--spacing-md);
   text-align: center;
+  position: relative;
 }
 
 .header-title {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-display);
+  font-size: 2.5rem;
+  font-weight: 900;
   color: var(--color-text-primary);
-  margin-bottom: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: none;
 }
 
 .header-icon {
-  font-size: var(--font-size-3xl);
+  font-size: 2.5rem;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+  animation: float 3s ease-in-out infinite;
 }
 
 .header-tagline {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-regular);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-family: var(--font-family-mono);
+  opacity: 0.8;
+  position: relative;
+  display: inline-block;
+  padding: 0 var(--spacing-lg);
+}
+
+/* Decorative lines around tagline */
+.header-tagline::before,
+.header-tagline::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 1px;
+  background: var(--color-accent);
+}
+
+.header-tagline::before {
+  left: 0;
+}
+
+.header-tagline::after {
+  right: 0;
 }
 
 @media (min-width: 768px) {
   .header {
-    padding: var(--spacing-xl) 0;
+    padding: var(--spacing-2xl) 0 var(--spacing-xl) 0;
   }
 
   .header-title {
-    font-size: var(--font-size-3xl);
+    font-size: 3.5rem;
+  }
+
+  .header-icon {
+    font-size: 3.5rem;
   }
 
   .header-tagline {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
+  }
+
+  .header-tagline::before,
+  .header-tagline::after {
+    width: 60px;
+  }
+}
+
+@media (max-width: 767px) {
+  .header-title {
+    flex-direction: column;
+    gap: var(--spacing-sm);
   }
 }

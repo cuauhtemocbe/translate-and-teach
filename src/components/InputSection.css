@@ -4,32 +4,54 @@
   background: var(--color-card);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
   margin-bottom: var(--spacing-xl);
+  border: 2px solid var(--color-border);
+  border-top-width: 4px;
+  border-top-color: var(--color-accent);
+  position: relative;
+  overflow: hidden;
+}
+
+.input-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gradient-mesh);
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 .input-container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  position: relative;
+  z-index: 1;
 }
 
 .input-field {
   width: 100%;
-  padding: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
   font-size: var(--font-size-base);
   line-height: var(--line-height-relaxed);
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   resize: vertical;
   min-height: 80px;
-  transition: all var(--transition-fast);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--color-card);
+  font-family: var(--font-family);
 }
 
 .input-field:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(56, 161, 105, 0.1);
+  box-shadow: 0 0 0 4px rgba(210, 105, 30, 0.15), var(--shadow-md);
   outline: none;
+  transform: translateY(-2px);
 }
 
 .input-field:disabled {
@@ -41,24 +63,29 @@
 .submit-button {
   padding: var(--spacing-md) var(--spacing-xl);
   font-size: var(--font-size-base);
-  font-weight: var(--font-weight-semibold);
+  font-weight: 600;
   color: white;
-  background: var(--color-accent);
+  background: var(--gradient-accent);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
   align-self: flex-start;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-family);
+  letter-spacing: 0.01em;
 }
 
 .submit-button:hover:not(:disabled) {
-  background: var(--color-accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: var(--shadow-xl);
+  filter: brightness(1.1);
 }
 
 .submit-button:active:not(:disabled) {
