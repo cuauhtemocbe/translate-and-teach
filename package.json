@@ -1,0 +1,49 @@
+{
+  "name": "typescript-pnpm-docker-boilerplate",
+  "version": "1.0.0",
+  "description": "A TypeScript boilerplate with pnpm, Docker, and DevContainers support",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.js",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "start": "pnpm dev",
+    "start:dev": "vite",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "validate": "./scripts/validate.sh",
+    "prepare": "husky",
+    "clean": "rm -rf dist node_modules .pnpm-store",
+    "clean:install": "pnpm clean && pnpm install"
+  },
+  "dependencies": {
+    "vite": "^8.0.10"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "@vitest/coverage-v8": "^4.1.5",
+    "@vitest/ui": "^4.1.5",
+    "esbuild": "0.28.0",
+    "husky": "^9.1.7",
+    "jsdom": "^25.0.1",
+    "lint-staged": "^16.4.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "bash -c 'cd /app && pnpm run typecheck'",
+      "bash -c 'cd /app && pnpm run build'"
+    ]
+  }
+}
