@@ -1,0 +1,31 @@
+/* ResultsGrid Component Styles */
+
+.results-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+/* Mobile: Single column */
+@media (max-width: 767px) {
+  .results-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Tablet and up: 2-column grid */
+@media (min-width: 768px) {
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-xl);
+  }
+}
+
+/* Optional: Larger screens can maintain 2 columns or expand */
+@media (min-width: 1024px) {
+  .results-grid {
+    max-width: 960px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

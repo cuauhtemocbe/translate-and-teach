@@ -1,214 +1,272 @@
-# 📚 translate-and-teach 🌍
+# 🌐 English Pro — Spanish Phrase Analyzer
 
-_Una plataforma de aprendizaje de idiomas moderna con TypeScript, Docker y DevContainers._
-
----
+AI-powered Spanish to English translation with grammatical analysis, learning tips, and contextual variations using Together.ai LLM.
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
-![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)
-![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-lightgrey?logo=githubactions&logoColor=white)
-![Licencia](https://img.shields.io/badge/license-MIT-green)
-![Producción Lista](https://img.shields.io/badge/Listo_para-Navegar_🌊-blue)
+![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)
+![Tests](https://img.shields.io/badge/Tests-38%20passing-success)
 
 ---
 
-## 🌐 Documentación
+## ✨ Features
 
-- 🇪🇸 Español (principal)
-- 🇬🇧 [English README](./docs/README_EN.md)
-
----
-
-## 🌊 Características
-
-- **TypeScript**: Soporte completo con chequeo estricto de tipos
-- **pnpm**: Gestor de paquetes rápido y eficiente con soporte para workspaces
-- **Vite**: Herramienta de construcción y servidor de desarrollo ultrarrápido
-- **Vitest**: Framework de pruebas unitarias veloz
-- **Docker**: Builds multi-stage para producción y contenedores de desarrollo
-- **DevContainers**: Entorno completo de desarrollo con VS Code
-- **Husky**: Hooks de Git para asegurar calidad de código
-- **CI/CD Listo**: Scripts de validación e integración con GitHub Actions
+- **AI-Powered Translation**: Uses meta-llama/Llama-3.3-70B via Together.ai
+- **4-Section Analysis**:
+  - 🌐 Principal Translation (main English translation)
+  - 📖 Grammatical Analysis (step-by-step breakdown)
+  - 💡 Learning Key (practical tips and insights)
+  - ⚙️ Technical Variations (formal, informal, contextual alternatives)
+- **Mobile-First Responsive Design**
+- **Accessibility**: WCAG 2.1 AA compliant
+- **TypeScript**: Full type safety with strict mode
+- **Test Coverage**: 38 passing tests (100% core logic)
 
 ---
 
-## 🛳️ Estructura del Proyecto
+## 🚀 Quick Start
 
-```
-├── .husky/                 # Hooks de Git
-├── scripts/                # Scripts de construcción y validación
-├── src/                    # Código fuente
-│   ├── main.ts            # Punto de entrada principal
-│   └── test/              # Archivos de prueba
-├── docker-compose.yml      # Entorno de desarrollo
-├── Dockerfile              # Build de producción
-├── Dockerfile.dev          # Entorno de desarrollo
-├── package.json            # Dependencias y scripts
-├── tsconfig.json           # Configuración de TypeScript
-├── vite.config.ts          # Configuración de Vite
-└── vitest.config.ts        # Configuración de pruebas
-```
+### Prerequisites
 
----
+- **Node.js** >= 22.0.0
+- **pnpm** >= 9.0.0
+- **Together.ai API Key** ([Get one here](https://api.together.xyz/settings/api-keys))
 
-## 📦 ¿Por qué pnpm?
-
-Este proyecto usa **pnpm** como gestor de paquetes por las siguientes razones:
-
-- **Rápido**: Hasta 2x más rápido que npm/yarn
-- **Eficiente**: Ahorra espacio en disco con un almacenamiento compartido de paquetes
-- **Estricto**: Previene dependencias fantasma y problemas de hoisting
-- **Monorepo-friendly**: Soporte nativo para workspaces
-- **Compatible**: Funciona con el mismo `package.json` que npm
-
-> ⚠️ **Importante**: Este proyecto requiere pnpm. No usar npm o yarn.
-
----
-
-## 🧭 Primeros Pasos
-
-Al deployar la app deberías ver:
-
-![image](./docs/pnpm-dev-example.png)
-
-### Requisitos previos
-
-- **[pnpm](https://pnpm.io/)** (gestor de paquetes requerido)
-- [Docker](https://www.docker.com/) y Docker Compose
-- [VS Code](https://code.visualstudio.com/) (recomendado)
-- [Extensión Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
-
-### Instalar pnpm
+### Installation
 
 ```bash
-npm install -g pnpm
-# o con corepack (Node.js 16.13+)
-corepack enable
-corepack prepare pnpm@latest --activate
-```
+# Clone repository
+git clone https://github.com/cuauhtemocbe/translate-and-teach.git
+cd translate-and-teach
 
-### Opción 1: Usando DevContainers (Recomendado)
-
-```bash
-pnpm dev
-```
-
-### Opción 2: Usando Docker Compose
-
-```bash
-docker-compose up -d
-docker-compose exec phaser-app bash
-pnpm install
-pnpm dev
-```
-
-### Opción 3: Desarrollo Local
-
-```bash
-# Instalar dependencias
+# Install dependencies
 pnpm install
 
-# Iniciar servidor de desarrollo
+# Configure environment variables
+cp .env.example .env
+# Edit .env and add your Together.ai API key
+```
+
+### Development
+
+```bash
+# Start development server
 pnpm dev
-# o simplemente
-pnpm start
-```
 
----
+# Run tests
+pnpm test
 
-## ⚡ Scripts Disponibles
+# Run tests with coverage
+pnpm test:coverage
 
-| Script                 | Descripción                                   |
-| ---------------------- | --------------------------------------------- |
-| `pnpm start`           | Alias para `pnpm dev`                         |
-| `pnpm start:dev`       | Inicia el servidor de desarrollo (Vite)       |
-| `pnpm dev`             | Inicia el servidor de desarrollo              |
-| `pnpm build`           | Construye para producción                     |
-| `pnpm typecheck`       | Revisa los tipos de TypeScript                |
-| `pnpm test`            | Ejecuta pruebas en modo watch                 |
-| `pnpm test:run`        | Ejecuta pruebas una sola vez                  |
-| `pnpm test:ui`         | Ejecuta pruebas con interfaz gráfica          |
-| `pnpm test:coverage`   | Ejecuta pruebas con cobertura                 |
-| `pnpm preview`         | Previsualiza el build de producción           |
-| `pnpm validate`        | Validación completa (tipos + pruebas + build) |
-| `pnpm clean`           | Limpia build y dependencias                   |
-| `pnpm clean:install`   | Limpia todo y reinstala dependencias          |
+# Type check
+pnpm typecheck
 
----
-
-## 🐳 Comandos Docker
-
-### Desarrollo
-
-```bash
-docker-compose up -d
-docker-compose logs -f
-docker-compose down
-```
-
-### Producción
-
-```bash
-docker build -t mi-app:latest .
-docker run -p 8080:8080 mi-app:latest
-```
-
----
-
-## 🧭 Archivos de Configuración
-
-- **TypeScript (tsconfig.json)**: Chequeo estricto, ES2022, alias de paths, source maps
-- **Vite (vite.config.ts)**: HMR, optimización para producción, alias de paths
-- **Testing (vitest.config.ts)**: Entorno JSDOM, reportes de cobertura, modo UI
-- **Package Manager (.npmrc, .pnpmrc)**: Optimizado para CI/CD
-
----
-
-## ⚓ Despliegue
-
-```bash
+# Build for production
 pnpm build
-docker build -t mi-app:latest .
-docker push mi-registro/mi-app:latest
+```
+
+The app will be available at `http://localhost:5173`
+
+---
+
+## 📁 Project Structure
+
+```
+translate-and-teach/
+├── specs/                      # Specification documents (spec-driven development)
+│   ├── english-pro.md         # Full specification
+│   ├── english-pro-plan.md    # Implementation plan
+│   └── TASKS.md               # Task checklist
+├── src/
+│   ├── components/            # React components
+│   │   ├── Header.tsx
+│   │   ├── InputSection.tsx
+│   │   ├── ResultCard.tsx
+│   │   └── ResultsGrid.tsx
+│   ├── services/              # API clients
+│   │   └── togetherApi.ts
+│   ├── utils/                 # Utility functions
+│   │   └── parseResponse.ts
+│   ├── types/                 # TypeScript types
+│   │   └── index.ts
+│   ├── styles/                # Global styles
+│   │   ├── globals.css
+│   │   └── variables.css
+│   ├── App.tsx                # Main app component
+│   ├── main.tsx               # React entry point
+│   └── vite-env.d.ts          # Vite environment types
+├── .env.example               # Environment variable template
+├── vite.config.ts             # Vite configuration
+├── tsconfig.json              # TypeScript configuration
+└── package.json               # Dependencies and scripts
 ```
 
 ---
 
-## 🔍 Calidad de Código
+## 🧪 Testing
 
-Incluye herramientas para asegurar la calidad:
+This project follows **Test-Driven Development (TDD)**:
 
-- **Husky** + **lint-staged**
-- **TypeScript estricto**
-- **Vitest** para pruebas completas
+```bash
+# Run all tests
+pnpm test
 
----
+# Run specific test file
+pnpm test Header
 
-## 📜 Buenas Prácticas
+# Run tests with coverage
+pnpm test:coverage
 
-1. Mantener dependencias actualizadas
-2. Escribir pruebas con buena cobertura
-3. Usar TypeScript en modo estricto
-4. Optimizar capas en Docker
-5. Usar variables de entorno con Vite
-6. Aprovechar los hooks de Git configurados
+# Run tests once (CI mode)
+pnpm test:run
+```
 
----
-
-## 🤝 Contribuir
-
-1. Haz un fork del repositorio
-2. Crea una rama de feature
-3. Realiza tus cambios
-4. Ejecuta `pnpm validate`
-5. Envía un Pull Request
+**Test Coverage**: 38 passing tests across 7 test files
+- ✅ Parser tests (8/8)
+- ✅ API client tests (9/9)
+- ✅ Component tests (21/21)
 
 ---
 
-## 📄 Licencia
+## 🎨 Design System
 
-Este proyecto está disponible bajo la licencia MIT.
+The app uses a comprehensive CSS variable-based design system:
+
+### Colors
+- Background: `#F0F4F8` (light blue-gray)
+- Card surface: `#FFFFFF`
+- Primary text: `#1A2B3C`
+- Accent: `#38A169` (green)
+
+### Typography
+- Font: Lato (Google Fonts)
+- Sizes: 12px - 30px (responsive)
+- Weights: 300, 400, 600, 700
+
+### Responsive Breakpoints
+- Mobile: < 640px (single column)
+- Tablet: 640px - 1024px (2-column grid)
+- Desktop: > 1024px (centered max-width)
 
 ---
 
-Hecho con ❤️ en el ⚓ **Dockyard** → listo para 🚢 **Navegar**
+## 🔒 API Key Security
+
+⚠️ **Important**: Never commit your API key to git!
+
+### Development
+The `.env` file is git-ignored. Your API key is safe locally.
+
+### Production Deployment
+For production, use environment variables or a serverless function to proxy API requests:
+
+**Option 1: Environment Variables (Vercel/Netlify)**
+```bash
+# Set in deployment platform dashboard
+VITE_TOGETHER_API_KEY=your_key_here
+```
+
+**Option 2: API Proxy (Recommended)**
+Create a serverless function that proxies requests to Together.ai without exposing the key.
+
+---
+
+## 📖 How It Works
+
+1. **User Input**: Enter a Spanish phrase
+2. **API Call**: Send to Together.ai with structured prompt
+3. **LLM Processing**: Llama-3.3-70B generates 4-section response
+4. **Parsing**: Extract sections from Markdown response
+5. **Display**: Render results in responsive card grid
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | React 18 |
+| Language | TypeScript 5 (strict mode) |
+| Build Tool | Vite 8 |
+| Testing | Vitest 4 + Testing Library |
+| AI Provider | Together.ai |
+| LLM Model | meta-llama/Llama-3.3-70B-Instruct-Turbo |
+| Styling | CSS3 with CSS Variables |
+| Fonts | Google Fonts (Lato) |
+
+---
+
+## 📋 Development Workflow
+
+This project follows **Spec-Driven Development**:
+
+1. **Phase 1**: SPECIFY → Create `specs/english-pro.md` ✅
+2. **Phase 2**: PLAN → Create `specs/english-pro-plan.md` ✅
+3. **Phase 3**: TASKS → Break into implementable tasks ✅
+4. **Phase 4**: IMPLEMENT → Build with TDD ✅
+5. **Phase 5**: POLISH → Accessibility, performance, docs ⏳
+
+See `specs/` directory for detailed documentation.
+
+---
+
+## 🚢 Deployment
+
+### Vercel (Recommended)
+
+```bash
+# Install Vercel CLI
+pnpm add -g vercel
+
+# Deploy
+vercel
+```
+
+### Netlify
+
+```bash
+# Install Netlify CLI
+pnpm add -g netlify-cli
+
+# Deploy
+netlify deploy --prod
+```
+
+### Manual Deployment
+
+```bash
+# Build
+pnpm build
+
+# Deploy dist/ folder to any static host
+```
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Follow TDD workflow (write tests first)
+4. Ensure all tests pass (`pnpm test:run`)
+5. Type check passes (`pnpm typecheck`)
+6. Submit a pull request
+
+---
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+---
+
+## 🙏 Acknowledgments
+
+- **Together.ai** for LLM API
+- **Meta** for Llama-3.3-70B model
+- **Claude Code** for spec-driven development workflow
+
+---
+
+Made with ❤️ for Spanish speakers learning English

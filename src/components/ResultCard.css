@@ -1,0 +1,84 @@
+/* ResultCard Component Styles */
+
+.result-card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-normal);
+}
+
+.result-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.result-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid transparent;
+}
+
+.result-card-icon {
+  font-size: var(--font-size-2xl);
+  line-height: 1;
+}
+
+.result-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.result-card-content {
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  font-size: var(--font-size-base);
+}
+
+.result-card-content p {
+  margin-bottom: var(--spacing-sm);
+}
+
+.result-card-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Variant Styles */
+.result-card--translation .result-card-header {
+  border-color: #3B82F6; /* Blue */
+}
+
+.result-card--grammar .result-card-header {
+  border-color: #6B7280; /* Gray */
+}
+
+.result-card--tips {
+  background: var(--color-highlight-tips);
+}
+
+.result-card--tips .result-card-header {
+  border-color: #F59E0B; /* Amber */
+}
+
+.result-card--variations .result-card-header {
+  border-color: var(--color-accent); /* Green */
+}
+
+@media (max-width: 767px) {
+  .result-card {
+    padding: var(--spacing-md);
+  }
+
+  .result-card-title {
+    font-size: var(--font-size-base);
+  }
+
+  .result-card-icon {
+    font-size: var(--font-size-xl);
+  }
+}
