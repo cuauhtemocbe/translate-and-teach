@@ -46,7 +46,7 @@ pnpm install
 
 # Configure environment variables
 cp .env.example .env
-# Edit .env and add your Together.ai API key
+# Edit .env and add your Together.ai API key and model name
 ```
 
 ### Development
@@ -153,20 +153,33 @@ The app uses a comprehensive CSS variable-based design system:
 
 ---
 
-## 🔒 API Key Security
+## 🔒 Configuration & Security
+
+### Required Environment Variables
+
+The following environment variables must be set in your `.env` file:
+
+```bash
+# Together.ai API Key (required)
+VITE_TOGETHER_API_KEY=your_api_key_here
+
+# Together.ai Model (required)
+VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
+```
 
 ⚠️ **Important**: Never commit your API key to git!
 
 ### Development
-The `.env` file is git-ignored. Your API key is safe locally.
+The `.env` file is git-ignored. Your credentials are safe locally.
 
 ### Production Deployment
-For production, use environment variables or a serverless function to proxy API requests:
+For production, set both environment variables in your deployment platform:
 
 **Option 1: Environment Variables (Vercel/Netlify)**
 ```bash
 # Set in deployment platform dashboard
 VITE_TOGETHER_API_KEY=your_key_here
+VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
 ```
 
 **Option 2: API Proxy (Recommended)**

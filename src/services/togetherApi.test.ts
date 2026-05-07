@@ -8,6 +8,8 @@ global.fetch = vi.fn();
 describe('togetherApi', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Set default env vars for tests
+    vi.stubEnv('VITE_TOGETHER_MODEL', 'meta-llama/Llama-3.3-70B-Instruct-Turbo');
   });
 
   it('should successfully translate a Spanish phrase', async () => {
@@ -156,5 +158,58 @@ Hi, Hey`
 
     // API key should be included
     expect(headers['Authorization']).toBe('Bearer test-api-key');
+  });
+
+  describe('getModel validation', () => {
+    it('should throw error when VITE_TOGETHER_MODEL is not set', async () => {
+      vi.stubEnv('VITE_TOGETHER_MODEL', undefined);
+
+      await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
+        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+      );
+    });
+
+    it('should throw error when VITE_TOGETHER_MODEL is empty string', async () => {
+      vi.stubEnv('VITE_TOGETHER_MODEL', '');
+
+      await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
+        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+      );
+    });
+
+    it('should throw error when VITE_TOGETHER_MODEL is whitespace only', async () => {
+      vi.stubEnv('VITE_TOGETHER_MODEL', '   ');
+
+      await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
+        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+      );
+    });
+
+    it('should use model from environment variable', async () => {
+      vi.stubEnv('VITE_TOGETHER_MODEL', 'custom-model-name');
+
+      const mockResponse: TogetherAIResponse = {
+        id: 'test-id',
+        choices: [{
+          message: {
+            role: 'assistant',
+            content: 'Test response'
+          },
+          finish_reason: 'stop'
+        }]
+      };
+
+      (global.fetch as any).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse
+      });
+
+      await translatePhrase('Hola', 'test-api-key');
+
+      const fetchCall = (global.fetch as any).mock.calls[0];
+      const requestBody = JSON.parse(fetchCall[1].body);
+
+      expect(requestBody.model).toBe('custom-model-name');
+    });
   });
 });

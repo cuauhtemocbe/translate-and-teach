@@ -17,8 +17,9 @@ You need a Together.ai API key to make the app functional.
 ### 2. Test Locally
 
 ```bash
-# Add API key to .env
+# Add required environment variables to .env
 echo "VITE_TOGETHER_API_KEY=your_actual_key_here" > .env
+echo "VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo" >> .env
 
 # Test the app
 pnpm dev
@@ -61,7 +62,9 @@ vercel
 # Follow prompts:
 # - Link to existing project or create new
 # - Configure project settings
-# - Add environment variable: VITE_TOGETHER_API_KEY
+# - Add environment variables:
+#   VITE_TOGETHER_API_KEY
+#   VITE_TOGETHER_MODEL
 
 # Deploy to production
 vercel --prod
@@ -77,9 +80,9 @@ vercel --prod
    - **Build Command**: `pnpm build`
    - **Output Directory**: `dist`
    - **Install Command**: `pnpm install`
-5. Add Environment Variable:
-   - **Key**: `VITE_TOGETHER_API_KEY`
-   - **Value**: Your Together.ai API key
+5. Add Environment Variables:
+   - **Key**: `VITE_TOGETHER_API_KEY`, **Value**: Your Together.ai API key
+   - **Key**: `VITE_TOGETHER_MODEL`, **Value**: `meta-llama/Llama-3.3-70B-Instruct-Turbo`
 6. Click "Deploy"
 
 ### Vercel Configuration
@@ -117,8 +120,9 @@ netlify init
 # - Build command: pnpm build
 # - Publish directory: dist
 
-# Add environment variable
+# Add environment variables
 netlify env:set VITE_TOGETHER_API_KEY "your_key_here"
+netlify env:set VITE_TOGETHER_MODEL "meta-llama/Llama-3.3-70B-Instruct-Turbo"
 
 # Deploy
 netlify deploy --prod
@@ -134,6 +138,7 @@ netlify deploy --prod
    - **Publish directory**: `dist`
    - **Environment variables**:
      - `VITE_TOGETHER_API_KEY`: Your Together.ai API key
+     - `VITE_TOGETHER_MODEL`: `meta-llama/Llama-3.3-70B-Instruct-Turbo`
 5. Click "Deploy"
 
 ### Netlify Configuration
@@ -157,6 +162,7 @@ docker build -t english-pro:latest .
 # Run locally
 docker run -p 8080:8080 \
   -e VITE_TOGETHER_API_KEY=your_key_here \
+  -e VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo \
   english-pro:latest
 
 # Open http://localhost:8080
@@ -169,7 +175,7 @@ docker run -p 8080:8080 \
 gcloud run deploy english-pro \
   --image english-pro:latest \
   --platform managed \
-  --set-env-vars VITE_TOGETHER_API_KEY=your_key
+  --set-env-vars VITE_TOGETHER_API_KEY=your_key,VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
 ```
 
 **AWS ECS, Azure Container Instances, etc.:**

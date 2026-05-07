@@ -1,7 +1,6 @@
 import type { TogetherAIResponse } from '../types';
 
 const TOGETHER_API_URL = 'https://api.together.xyz/v1/chat/completions';
-const MODEL = 'meta-llama/Llama-3.3-70B-Instruct-Turbo';
 
 const SYSTEM_PROMPT = `You are an expert English language tutor and translator. Your task is to help Spanish speakers understand English translations.
 
@@ -37,6 +36,21 @@ function getApiKey(apiKeyOverride?: string): string {
 }
 
 /**
+ * Get model name from environment variables
+ */
+function getModel(): string {
+  const model = import.meta.env.VITE_TOGETHER_MODEL;
+
+  if (!model || model.trim() === '') {
+    throw new Error(
+      'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+    );
+  }
+
+  return model;
+}
+
+/**
  * Translates a Spanish phrase using Together.ai LLM
  *
  * @param spanishPhrase - The Spanish phrase to translate
@@ -54,9 +68,10 @@ export async function translatePhrase(
   }
 
   const apiKey = getApiKey(apiKeyOverride);
+  const model = getModel();
 
   const requestBody = {
-    model: MODEL,
+    model: model,
     max_tokens: 1024,
     messages: [
       {
