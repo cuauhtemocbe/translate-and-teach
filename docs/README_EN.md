@@ -1,6 +1,6 @@
-# ⚓ dockyard2sail-ts 🚢
+# 📚 translate-and-teach 🌍
 
-_A production-ready TypeScript + Docker + DevContainers boilerplate_
+_A modern language learning platform built with TypeScript, Docker and DevContainers_
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 ![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)

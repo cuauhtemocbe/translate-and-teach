@@ -1,7 +1,7 @@
 {
-  "name": "typescript-pnpm-docker-boilerplate",
+  "name": "translate-and-teach",
   "version": "1.0.0",
-  "description": "A TypeScript boilerplate with pnpm, Docker, and DevContainers support",
+  "description": "Translate and Teach - A language learning platform",
   "private": true,
   "type": "module",
   "main": "dist/main.js",

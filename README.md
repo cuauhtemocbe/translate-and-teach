@@ -1,6 +1,6 @@
-# ⚓ dockyard2sail-ts 🚢
+# 📚 translate-and-teach 🌍
 
-_Un boilerplate moderno y listo para producción con TypeScript, Docker y DevContainers._
+_Una plataforma de aprendizaje de idiomas moderna con TypeScript, Docker y DevContainers._
 
 ---
 

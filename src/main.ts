@@ -184,7 +184,7 @@ if (typeof document === "undefined") {
         </p>
 
         <div style="margin: 2rem 0; color: #667eea; font-weight: 500; font-size: 1.1rem;">
-          ⚓ dockyard2sail-ts 🚢
+          📚 translate-and-teach 🌍
         </div>
         <p style="color: #6b7280; font-size: 0.875rem; line-height: 1.6; margin: 0 0 2rem 0; max-width: 400px; margin-left: auto; margin-right: auto;">
           Un boilerplate moderno y listo para producción con TypeScript, pnpm, Docker y DevContainers, con pipeline completo de CI/CD. Permite iniciar rápido el desarrollo local, validar con hooks de Git y desplegar fácilmente a producción.
