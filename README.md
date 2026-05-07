@@ -5,7 +5,7 @@ AI-powered Spanish to English translation with grammatical analysis, learning ti
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite)
-![Tests](https://img.shields.io/badge/Tests-38%20passing-success)
+![Tests](https://img.shields.io/badge/Tests-54%20passing-success)
 
 ---
 
@@ -17,10 +17,12 @@ AI-powered Spanish to English translation with grammatical analysis, learning ti
   - 📖 Grammatical Analysis (step-by-step breakdown)
   - 💡 Learning Key (practical tips and insights)
   - ⚙️ Technical Variations (formal, informal, contextual alternatives)
+- **Dark Theme by Default**: Beautiful dark mode with light theme toggle
+- **Theme Persistence**: Your theme preference is saved locally
 - **Mobile-First Responsive Design**
 - **Accessibility**: WCAG 2.1 AA compliant
 - **TypeScript**: Full type safety with strict mode
-- **Test Coverage**: 38 passing tests (100% core logic)
+- **Test Coverage**: 54 passing tests (100% core logic)
 
 ---
 

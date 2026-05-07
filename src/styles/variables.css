@@ -1,27 +1,46 @@
 /* English Pro - CSS Variables (Design System) */
 
 :root {
-  /* Colors - Background & Surface */
+  /* Light Theme Colors */
   --color-background: #F0F4F8;
   --color-card: #FFFFFF;
-
-  /* Colors - Text */
   --color-text-primary: #1A2B3C;
   --color-text-secondary: #4A5568;
-
-  /* Colors - Accent */
   --color-accent: #38A169;
   --color-accent-hover: #2F855A;
-
-  /* Colors - Borders */
   --color-border: #CBD5E0;
-
-  /* Colors - Highlights */
   --color-highlight-tips: #FFF3CD;
-
-  /* Colors - Status */
   --color-error: #EF4444;
   --color-success: #10B981;
+}
+
+/* Dark Theme */
+[data-theme='dark'] {
+  /* Colors - Background & Surface */
+  --color-background: #0F172A;
+  --color-card: #1E293B;
+
+  /* Colors - Text */
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #CBD5E1;
+
+  /* Colors - Accent */
+  --color-accent: #4ADE80;
+  --color-accent-hover: #22C55E;
+
+  /* Colors - Borders */
+  --color-border: #334155;
+
+  /* Colors - Highlights */
+  --color-highlight-tips: #422006;
+
+  /* Colors - Status */
+  --color-error: #F87171;
+  --color-success: #34D399;
+}
+
+/* Preserve non-color variables */
+:root, [data-theme='dark'] {
 
   /* Typography */
   --font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;

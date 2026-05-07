@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import { InputSection } from './components/InputSection';
 import { ResultsGrid } from './components/ResultsGrid';
+import { ThemeToggle } from './components/ThemeToggle';
+import { useTheme } from './hooks/useTheme';
 import { translatePhrase } from './services/togetherApi';
 import { parseResponse } from './utils/parseResponse';
 import type { TranslationResponse } from './types';
@@ -17,6 +19,7 @@ export function App() {
   const [results, setResults] = useState<TranslationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { theme, toggleTheme } = useTheme();
 
   // Focus results when they appear
   useEffect(() => {
@@ -59,6 +62,9 @@ export function App() {
       <a href="#main-content" className="skip-link">
         Skip to main content
       </a>
+
+      {/* Theme toggle button */}
+      <ThemeToggle theme={theme} onToggle={toggleTheme} />
 
       <Header />
 
