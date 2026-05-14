@@ -150,7 +150,7 @@ Hi, Hey`;
   });
 
   describe('Timer functionality', () => {
-    it('should show elapsed time after successful translation', async () => {
+    it('should show elapsed time on button after successful translation', async () => {
       vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(
         '## Principal Translation\nHello'
       );
@@ -164,17 +164,17 @@ Hi, Hey`;
       const button = screen.getByRole('button', { name: /Generar traducción/i });
       await user.click(button);
 
-      // Verify timer appears with completion message
+      // Verify button shows completion message with time
       await waitFor(() => {
-        expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
+        expect(screen.getByText(/Completado en/i)).toBeInTheDocument();
       });
 
-      // Verify time is displayed (should show some decimal like X.Xs)
-      const timerText = screen.getByText(/Translation completed in/i).textContent;
-      expect(timerText).toMatch(/Translation completed in \d+\.\d+s/);
+      // Verify time is displayed in format X.Xs
+      const buttonText = screen.getByText(/Completado en/i).textContent;
+      expect(buttonText).toMatch(/Completado en \d+\.\d+s/);
     });
 
-    it('should show elapsed time even when API fails', async () => {
+    it('should show elapsed time on button even when API fails', async () => {
       vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
         new Error('API error')
       );
@@ -188,22 +188,22 @@ Hi, Hey`;
       const button = screen.getByRole('button', { name: /Generar traducción/i });
       await user.click(button);
 
-      // Timer should still appear even on error
+      // Button should show completion time even on error
       await waitFor(() => {
-        expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
+        expect(screen.getByText(/Completado en/i)).toBeInTheDocument();
       });
 
       // Verify time is displayed
-      const timerText = screen.getByText(/Translation completed in/i).textContent;
-      expect(timerText).toMatch(/Translation completed in \d+\.\d+s/);
+      const buttonText = screen.getByText(/Completado en/i).textContent;
+      expect(buttonText).toMatch(/Completado en \d+\.\d+s/);
     });
 
-    it('should not show timer before first translation', () => {
+    it('should show normal button text initially', () => {
       render(<App />);
 
-      // Timer should not be visible initially
-      expect(screen.queryByText(/Translation completed in/i)).not.toBeInTheDocument();
-      expect(screen.queryByText(/Translating\.\.\./i)).not.toBeInTheDocument();
+      // Button should show normal text initially
+      expect(screen.getByText(/Generar traducción/i)).toBeInTheDocument();
+      expect(screen.queryByText(/Completado en/i)).not.toBeInTheDocument();
     });
   });
 });

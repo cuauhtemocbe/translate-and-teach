@@ -59,10 +59,10 @@ Variations here`;
         expect(screen.getByText('Principal Translation')).toBeInTheDocument();
       });
 
-      // Step 5: Verify timer shows completion time
-      expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
-      const timerText = screen.getByText(/Translation completed in/i).textContent;
-      expect(timerText).toMatch(/Translation completed in \d+\.\d+s/);
+      // Step 5: Verify button shows completion time
+      expect(screen.getByText(/Completado en/i)).toBeInTheDocument();
+      const buttonText = screen.getByText(/Completado en/i).textContent;
+      expect(buttonText).toMatch(/Completado en \d+\.\d+s/);
 
       // Step 6: Verify markdown is rendered (bold)
       const strongElements = container.querySelectorAll('strong');
@@ -108,8 +108,8 @@ Variations here`;
         expect(screen.getByText(/Network error/i)).toBeInTheDocument();
       });
 
-      // Timer should still show elapsed time
-      expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
+      // Button should still show elapsed time
+      expect(screen.getByText(/Completado en/i)).toBeInTheDocument();
 
       // Results should NOT be shown
       expect(screen.queryByText('Principal Translation')).not.toBeInTheDocument();
@@ -160,8 +160,8 @@ Second variation example.`;
         expect(screen.getByText(/This is the/i)).toBeInTheDocument();
       });
 
-      // Verify timer appeared
-      expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
+      // Verify button showed completion
+      expect(screen.getByText(/Completado en/i)).toBeInTheDocument();
 
       // Verify first markdown (bold "first")
       let strongElements = container.querySelectorAll('strong');
@@ -178,8 +178,8 @@ Second variation example.`;
         expect(Array.from(emElements).some(el => el.textContent === 'second')).toBe(true);
       });
 
-      // Verify timer still shows (reset and updated)
-      expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
+      // Verify button still shows completion (reset and updated)
+      expect(screen.getByText(/Completado en/i)).toBeInTheDocument();
 
       // Verify second markdown (italic "second")
       const emElements = container.querySelectorAll('em');

@@ -12,6 +12,8 @@ describe('InputSection', () => {
         onSubmit={() => {}}
         loading={false}
         error={null}
+        elapsedTime={null}
+        showCompletion={false}
       />
     );
 
@@ -30,6 +32,8 @@ describe('InputSection', () => {
         onSubmit={() => {}}
         loading={false}
         error={null}
+        elapsedTime={null}
+        showCompletion={false}
       />
     );
 
@@ -50,6 +54,8 @@ describe('InputSection', () => {
         onSubmit={onSubmit}
         loading={false}
         error={null}
+        elapsedTime={null}
+        showCompletion={false}
       />
     );
 
@@ -67,6 +73,8 @@ describe('InputSection', () => {
         onSubmit={() => {}}
         loading={true}
         error={null}
+        elapsedTime={null}
+        showCompletion={false}
       />
     );
 
@@ -85,6 +93,8 @@ describe('InputSection', () => {
         onSubmit={() => {}}
         loading={true}
         error={null}
+        elapsedTime={null}
+        showCompletion={false}
       />
     );
 
@@ -99,6 +109,8 @@ describe('InputSection', () => {
         onSubmit={() => {}}
         loading={false}
         error="API error occurred"
+        elapsedTime={null}
+        showCompletion={false}
       />
     );
 
@@ -113,10 +125,79 @@ describe('InputSection', () => {
         onSubmit={() => {}}
         loading={true}
         error={null}
+        elapsedTime={null}
+        showCompletion={false}
       />
     );
 
     const button = screen.getByRole('button');
     expect(button).toHaveAttribute('aria-busy', 'true');
+  });
+
+  describe('Timer display on button', () => {
+    it('should show elapsed time during loading', () => {
+      render(
+        <InputSection
+          value="Test"
+          onChange={() => {}}
+          onSubmit={() => {}}
+          loading={true}
+          error={null}
+          elapsedTime={2.3}
+          showCompletion={false}
+        />
+      );
+
+      expect(screen.getByText(/Traduciendo\.\.\. 2\.3s/i)).toBeInTheDocument();
+    });
+
+    it('should show completion message with elapsed time', () => {
+      render(
+        <InputSection
+          value="Test"
+          onChange={() => {}}
+          onSubmit={() => {}}
+          loading={false}
+          error={null}
+          elapsedTime={3.7}
+          showCompletion={true}
+        />
+      );
+
+      expect(screen.getByText(/Completado en 3\.7s/i)).toBeInTheDocument();
+    });
+
+    it('should show normal button text when not loading and not showing completion', () => {
+      render(
+        <InputSection
+          value="Test"
+          onChange={() => {}}
+          onSubmit={() => {}}
+          loading={false}
+          error={null}
+          elapsedTime={2.0}
+          showCompletion={false}
+        />
+      );
+
+      expect(screen.getByText(/Generar traducción/i)).toBeInTheDocument();
+    });
+
+    it('should show "Traduciendo..." without time if elapsedTime is null', () => {
+      render(
+        <InputSection
+          value="Test"
+          onChange={() => {}}
+          onSubmit={() => {}}
+          loading={true}
+          error={null}
+          elapsedTime={null}
+          showCompletion={false}
+        />
+      );
+
+      const button = screen.getByRole('button');
+      expect(button.textContent).toMatch(/Traduciendo\.\.\./);
+    });
   });
 });

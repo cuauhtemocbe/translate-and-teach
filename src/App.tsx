@@ -3,7 +3,6 @@ import { Header } from './components/Header';
 import { InputSection } from './components/InputSection';
 import { ResultsGrid } from './components/ResultsGrid';
 import { ThemeToggle } from './components/ThemeToggle';
-import { TranslationTimer } from './components/TranslationTimer';
 import { useTheme } from './hooks/useTheme';
 import { translatePhrase } from './services/togetherApi';
 import { parseResponse } from './utils/parseResponse';
@@ -20,7 +19,10 @@ export function App() {
   const [results, setResults] = useState<TranslationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [elapsedTime, setElapsedTime] = useState<number | null>(null);
+  const [showCompletion, setShowCompletion] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const timerIntervalRef = useRef<number | null>(null);
+  const completionTimeoutRef = useRef<number | null>(null);
   const { theme, toggleTheme } = useTheme();
 
   // Focus results when they appear
@@ -36,18 +38,35 @@ export function App() {
     setLoading(true);
     setError(null);
     setResults(null);
-    setElapsedTime(null);
+    setElapsedTime(0);
+    setShowCompletion(false);
+
+    // Clear any existing timers
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+    if (completionTimeoutRef.current) {
+      clearTimeout(completionTimeoutRef.current);
+    }
 
     // Start timer
     const startTime = performance.now();
+
+    // Update elapsed time every 100ms during loading
+    timerIntervalRef.current = window.setInterval(() => {
+      const currentTime = performance.now();
+      const elapsed = (currentTime - startTime) / 1000;
+      setElapsedTime(elapsed);
+    }, 100);
 
     try {
       // Call API
       const response = await translatePhrase(input.trim());
 
-      // Stop timer and calculate elapsed time
+      // Stop timer and calculate final elapsed time
+      clearInterval(timerIntervalRef.current);
       const endTime = performance.now();
-      const elapsed = (endTime - startTime) / 1000; // Convert to seconds
+      const elapsed = (endTime - startTime) / 1000;
       setElapsedTime(elapsed);
 
       // Parse response
@@ -55,8 +74,17 @@ export function App() {
 
       // Set results
       setResults(parsed);
+
+      // Show completion message
+      setShowCompletion(true);
+
+      // Hide completion message after 3 seconds
+      completionTimeoutRef.current = window.setTimeout(() => {
+        setShowCompletion(false);
+      }, 3000);
     } catch (err) {
       // Stop timer even on error
+      clearInterval(timerIntervalRef.current);
       const endTime = performance.now();
       const elapsed = (endTime - startTime) / 1000;
       setElapsedTime(elapsed);
@@ -67,10 +95,28 @@ export function App() {
         : 'Ocurrió un error al generar la traducción. Intenta de nuevo.';
 
       setError(errorMessage);
+
+      // Show completion message briefly even on error
+      setShowCompletion(true);
+      completionTimeoutRef.current = window.setTimeout(() => {
+        setShowCompletion(false);
+      }, 3000);
     } finally {
       setLoading(false);
     }
   };
+
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+      if (completionTimeoutRef.current) {
+        clearTimeout(completionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="app">
@@ -95,9 +141,9 @@ export function App() {
           onSubmit={handleSubmit}
           loading={loading}
           error={error}
+          elapsedTime={elapsedTime}
+          showCompletion={showCompletion}
         />
-
-        <TranslationTimer isLoading={loading} elapsedTime={elapsedTime} />
 
         {results && (
           <div

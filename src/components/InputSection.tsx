@@ -6,13 +6,15 @@ interface InputSectionProps {
   onSubmit: () => void;
   loading: boolean;
   error: string | null;
+  elapsedTime: number | null;
+  showCompletion: boolean;
 }
 
 /**
  * InputSection component
  * Contains textarea input and submit button
  */
-export function InputSection({ value, onChange, onSubmit, loading, error }: InputSectionProps) {
+export function InputSection({ value, onChange, onSubmit, loading, error, elapsedTime, showCompletion }: InputSectionProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Submit on Ctrl+Enter or Cmd+Enter
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -52,10 +54,20 @@ export function InputSection({ value, onChange, onSubmit, loading, error }: Inpu
           disabled={loading || !value.trim()}
           aria-busy={loading}
         >
-          {loading ? (
+          {loading && elapsedTime != null ? (
+            <>
+              <span className="spinner" aria-hidden="true"></span>
+              Traduciendo... {elapsedTime.toFixed(1)}s
+            </>
+          ) : loading ? (
             <>
               <span className="spinner" aria-hidden="true"></span>
               Traduciendo...
+            </>
+          ) : showCompletion && elapsedTime != null ? (
+            <>
+              <span aria-hidden="true">✓</span>
+              Completado en {elapsedTime.toFixed(1)}s
             </>
           ) : (
             <>
