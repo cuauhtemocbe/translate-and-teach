@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Header } from './components/Header';
+import { Hero } from './components/Hero';
+import { Features } from './components/Features';
 import { InputSection } from './components/InputSection';
 import { ResultsGrid } from './components/ResultsGrid';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -128,12 +129,12 @@ export function App() {
       {/* Theme toggle button */}
       <ThemeToggle theme={theme} onToggle={toggleTheme} />
 
-      <Header />
+      <Hero />
 
       <main
         id="main-content"
         className="container"
-        style={{ paddingTop: 'var(--spacing-xl)', paddingBottom: 'var(--spacing-xl)' }}
+        style={{ paddingTop: 'var(--spacing-2xl)', paddingBottom: 'var(--spacing-xl)' }}
       >
         <InputSection
           value={input}
@@ -157,6 +158,9 @@ export function App() {
           </div>
         )}
       </main>
+
+      {/* Features section - only show when no results */}
+      {!results && <Features />}
 
       <footer className="app-footer">
         <div className="container">

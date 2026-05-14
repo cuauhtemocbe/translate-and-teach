@@ -1,28 +1,20 @@
-/* InputSection Component Styles */
+/* InputSection Component Styles - Minimalist */
 
 .input-section {
   background: var(--color-card);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-xl);
-  box-shadow: var(--shadow-lg);
-  margin-bottom: var(--spacing-xl);
-  border: 2px solid var(--color-border);
-  border-top-width: 4px;
-  border-top-color: var(--color-accent);
+  padding: clamp(1.5rem, 4vw, 2rem);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  margin-bottom: var(--spacing-2xl);
+  border: 1px solid var(--color-border);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
-.input-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: var(--gradient-mesh);
-  opacity: 0.3;
-  pointer-events: none;
+.input-section:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 8px 32px rgba(30, 136, 229, 0.12);
 }
 
 .input-container {
@@ -35,66 +27,74 @@
 
 .input-field {
   width: 100%;
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: var(--font-size-base);
+  padding: var(--spacing-lg);
+  font-size: var(--font-size-lg);
   line-height: var(--line-height-relaxed);
-  border: 2px solid var(--color-border);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   resize: vertical;
-  min-height: 80px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  background: var(--color-card);
+  min-height: 120px;
+  transition: all 0.3s ease;
+  background: var(--color-background);
   font-family: var(--font-family);
+  color: var(--color-text-primary);
+}
+
+.input-field::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.6;
 }
 
 .input-field:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 4px rgba(210, 105, 30, 0.15), var(--shadow-md);
+  background: var(--color-card);
   outline: none;
-  transform: translateY(-2px);
 }
 
 .input-field:disabled {
-  background: #F9FAFB;
+  background: var(--color-background-secondary);
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .submit-button {
-  padding: var(--spacing-md) var(--spacing-xl);
+  padding: 1rem 2rem;
   font-size: var(--font-size-base);
   font-weight: 600;
   color: white;
-  background: var(--gradient-accent);
+  background: var(--color-accent);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-sm);
-  align-self: flex-start;
-  box-shadow: var(--shadow-md);
+  align-self: flex-end;
+  box-shadow: 0 2px 12px rgba(30, 136, 229, 0.3);
   position: relative;
-  overflow: hidden;
   font-family: var(--font-family);
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
+  min-width: 200px;
 }
 
 .submit-button:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: var(--shadow-xl);
-  filter: brightness(1.1);
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(30, 136, 229, 0.4);
 }
 
 .submit-button:active:not(:disabled) {
   transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(30, 136, 229, 0.3);
 }
 
 .submit-button:disabled {
-  background: #9CA3AF;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 .spinner {
@@ -110,12 +110,24 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md);
-  background: #FEF2F2;
-  border: 1px solid #FCA5A5;
-  border-radius: var(--radius-md);
-  color: #991B1B;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: rgba(220, 38, 38, 0.05);
+  border-left: 3px solid var(--color-error);
+  border-radius: var(--radius-sm);
+  color: var(--color-error);
   font-size: var(--font-size-sm);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .error-icon {
@@ -123,22 +135,14 @@
   flex-shrink: 0;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 640px) {
   .input-field {
     min-height: 100px;
-  }
-
-  .submit-button {
-    align-self: flex-end;
-  }
-}
-
-@media (max-width: 639px) {
-  .input-section {
-    padding: var(--spacing-md);
+    font-size: var(--font-size-base);
   }
 
   .submit-button {
     width: 100%;
+    min-width: auto;
   }
 }

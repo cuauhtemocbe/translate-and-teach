@@ -14,10 +14,10 @@ describe('App', () => {
     vi.clearAllMocks();
   });
 
-  it('should render header and input section', () => {
+  it('should render hero and input section', () => {
     render(<App />);
 
-    expect(screen.getByText(/English Pro/i)).toBeInTheDocument();
+    expect(screen.getByText('English Pro')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Escribe una frase/i)).toBeInTheDocument();
   });
 
@@ -137,8 +137,9 @@ Hi, Hey`;
   it('should have accessible form structure', () => {
     render(<App />);
 
-    // Header should be a banner
-    expect(screen.getByRole('banner')).toBeInTheDocument();
+    // Hero section should be present
+    const hero = document.querySelector('.hero');
+    expect(hero).toBeInTheDocument();
 
     // Main content should be in main element
     const main = document.querySelector('main');

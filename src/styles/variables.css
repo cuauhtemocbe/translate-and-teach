@@ -1,58 +1,58 @@
 /* English Pro - CSS Variables (Design System) */
 
 :root {
-  /* Light Theme Colors - Warm Editorial Palette */
-  --color-background: #FBF8F3;
-  --color-background-secondary: #F5EFE7;
+  /* Light Theme Colors - Ocean Blue Editorial Palette */
+  --color-background: #F8FAFC;
+  --color-background-secondary: #F1F5F9;
   --color-card: #FFFFFF;
-  --color-text-primary: #1C1410;
-  --color-text-secondary: #5C4A3D;
-  --color-accent: #D2691E;
-  --color-accent-hover: #CC5500;
-  --color-accent-secondary: #E87A4F;
-  --color-border: #E6D5C3;
-  --color-highlight-tips: #FFF4E6;
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-accent: #1E88E5;
+  --color-accent-hover: #1565C0;
+  --color-accent-secondary: #42A5F5;
+  --color-border: #BBDEFB;
+  --color-highlight-tips: #E3F2FD;
   --color-error: #DC2626;
   --color-success: #059669;
 
   /* Gradient colors */
-  --gradient-warm: linear-gradient(135deg, #F5EFE7 0%, #E6D5C3 100%);
-  --gradient-accent: linear-gradient(135deg, #D2691E 0%, #CC5500 100%);
-  --gradient-mesh: radial-gradient(at 20% 30%, rgba(210, 105, 30, 0.15) 0%, transparent 50%),
-                   radial-gradient(at 80% 70%, rgba(232, 122, 79, 0.12) 0%, transparent 50%);
+  --gradient-warm: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+  --gradient-accent: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+  --gradient-mesh: radial-gradient(at 20% 30%, rgba(30, 136, 229, 0.12) 0%, transparent 50%),
+                   radial-gradient(at 80% 70%, rgba(66, 165, 245, 0.08) 0%, transparent 50%);
 }
 
-/* Dark Theme - Warm Editorial Palette */
+/* Dark Theme - Ocean Blue Editorial Palette */
 [data-theme='dark'] {
   /* Colors - Background & Surface */
-  --color-background: #1A1410;
-  --color-background-secondary: #2A2118;
-  --color-card: #2A2118;
+  --color-background: #0F172A;
+  --color-background-secondary: #1E293B;
+  --color-card: #1E293B;
 
   /* Colors - Text */
-  --color-text-primary: #F5EFE7;
-  --color-text-secondary: #D4C4B0;
+  --color-text-primary: #F1F5F9;
+  --color-text-secondary: #CBD5E1;
 
   /* Colors - Accent */
-  --color-accent: #E87A4F;
-  --color-accent-hover: #F09168;
-  --color-accent-secondary: #D2691E;
+  --color-accent: #42A5F5;
+  --color-accent-hover: #64B5F6;
+  --color-accent-secondary: #2196F3;
 
   /* Colors - Borders */
-  --color-border: #3D3128;
+  --color-border: #334155;
 
   /* Colors - Highlights */
-  --color-highlight-tips: #332210;
+  --color-highlight-tips: #1E3A5F;
 
   /* Colors - Status */
   --color-error: #EF4444;
   --color-success: #10B981;
 
   /* Gradient colors */
-  --gradient-warm: linear-gradient(135deg, #2A2118 0%, #3D3128 100%);
-  --gradient-accent: linear-gradient(135deg, #E87A4F 0%, #D2691E 100%);
-  --gradient-mesh: radial-gradient(at 20% 30%, rgba(232, 122, 79, 0.08) 0%, transparent 50%),
-                   radial-gradient(at 80% 70%, rgba(210, 105, 30, 0.06) 0%, transparent 50%);
+  --gradient-warm: linear-gradient(135deg, #1E293B 0%, #334155 100%);
+  --gradient-accent: linear-gradient(135deg, #42A5F5 0%, #2196F3 100%);
+  --gradient-mesh: radial-gradient(at 20% 30%, rgba(66, 165, 245, 0.08) 0%, transparent 50%),
+                   radial-gradient(at 80% 70%, rgba(33, 150, 243, 0.06) 0%, transparent 50%);
 }
 
 /* Preserve non-color variables */
