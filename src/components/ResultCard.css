@@ -3,37 +3,60 @@
 .result-card {
   background: var(--color-card);
   border-radius: var(--radius-lg);
-  border: 2px solid var(--color-border);
-  border-left-width: 6px;
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
   padding: var(--spacing-xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
 }
 
-/* Subtle gradient overlay */
+/* Top accent border (reveals on hover) */
 .result-card::before {
   content: '';
   position: absolute;
   top: 0;
+  left: 0;
   right: 0;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle at center, rgba(30, 136, 229, 0.05) 0%, transparent 70%);
-  pointer-events: none;
+  height: 3px;
+  background: var(--card-accent-color, var(--color-accent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Subtle glow effect */
+.result-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    circle at 50% 0%,
+    var(--card-accent-color, var(--color-accent)),
+    transparent 70%
+  );
   opacity: 0;
   transition: opacity 0.4s ease;
+  pointer-events: none;
 }
 
 .result-card:hover {
-  box-shadow: var(--shadow-xl);
-  transform: translateY(-4px) rotate(-0.5deg);
-  border-left-width: 8px;
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: var(--card-accent-color, var(--color-accent));
+  border-left-width: 4px;
 }
 
 .result-card:hover::before {
-  opacity: 1;
+  transform: scaleX(1);
+}
+
+.result-card:hover::after {
+  opacity: 0.04;
 }
 
 .result-card-header {
@@ -47,14 +70,23 @@
 }
 
 .result-card-icon {
-  font-size: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-size: 1.5rem;
   line-height: 1;
-  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.08));
-  transition: transform 0.3s ease;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .result-card:hover .result-card-icon {
-  transform: scale(1.1) rotate(5deg);
+  background: var(--card-accent-color, var(--color-accent));
+  border-color: var(--card-accent-color, var(--color-accent));
+  transform: rotate(5deg) scale(1.15);
 }
 
 .result-card-title {
@@ -79,8 +111,9 @@
   margin-bottom: 0;
 }
 
-/* Distinctive Variant Styles with Warm Palette */
+/* Distinctive Variant Styles - Set accent colors as CSS variables */
 .result-card--translation {
+  --card-accent-color: #2563EB;
   border-left-color: #2563EB;
 }
 
@@ -89,6 +122,7 @@
 }
 
 .result-card--grammar {
+  --card-accent-color: #7C3AED;
   border-left-color: #7C3AED;
 }
 
@@ -97,20 +131,17 @@
 }
 
 .result-card--tips {
+  --card-accent-color: var(--color-accent);
   background: var(--color-highlight-tips);
   border-left-color: var(--color-accent);
-  border-left-width: 8px;
 }
 
 .result-card--tips .result-card-header {
   border-bottom-color: var(--color-accent);
 }
 
-.result-card--tips::before {
-  background: radial-gradient(circle at center, rgba(66, 165, 245, 0.1) 0%, transparent 70%);
-}
-
 .result-card--variations {
+  --card-accent-color: #059669;
   border-left-color: #059669;
 }
 
@@ -169,11 +200,12 @@
 @media (max-width: 767px) {
   .result-card {
     padding: var(--spacing-lg);
-    border-left-width: 4px;
+    border-left-width: 3px;
   }
 
   .result-card:hover {
-    border-left-width: 6px;
+    transform: translateY(-4px);
+    border-left-width: 3px;
   }
 
   .result-card-title {
@@ -181,6 +213,8 @@
   }
 
   .result-card-icon {
-    font-size: var(--font-size-xl);
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
   }
 }
