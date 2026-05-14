@@ -10,7 +10,9 @@ issue: TBD
 
 ## Objective
 
-Replace the current insecure ARG/ENV approach for managing API keys with Docker BuildKit secrets, eliminating secret exposure in image layers while maintaining the build-time configuration injection pattern for Railway deployments.
+Implement secure environment variable handling for Railway deployments using Railway's ARG/ENV pattern with sealed variables, mitigating secret exposure risks while maintaining the build-time configuration injection pattern.
+
+**Note:** Original plan was to use Docker BuildKit secrets, but Railway does not support `--mount=type=secret`. Railway's recommended approach is ARG/ENV with their "sealed variables" feature for additional security.
 
 ## Context
 
@@ -68,15 +70,20 @@ SecretsUsedInArgOrEnv: Do not use ARG or ENV instructions for sensitive data
 
 ### High-Level Approach
 
-**Docker BuildKit Secrets** for sensitive data:
-- Railway passes secrets to build via `--secret` flag
-- Dockerfile mounts secrets temporarily during build (not baked into layers)
-- Vite reads secrets from mounted files, injects into bundle
-- Secrets disappear after build completes
+**Railway's ARG/ENV with Sealed Variables** (Actual Implementation):
+- Railway injects environment variables at build time
+- Dockerfile uses `ARG` to receive variables
+- Sensitive values marked as "sealed" in Railway dashboard
+- Sealed variables are hidden from Railway UI/API but available during builds
+- Railway images remain private (not pushed to public registries)
 
-**Standard Build Args** for non-sensitive config:
-- Model names, feature flags, URLs use ARG/ENV (not sensitive)
-- Follows existing pattern (no security concern)
+**Why not BuildKit Secrets:**
+- Railway does not support `--mount=type=secret` (only `--mount=type=cache`)
+- Railway's recommended approach is ARG/ENV with sealed variables
+- Security trade-off acceptable because:
+  - Railway images are private
+  - Sealed variables provide UI/API protection
+  - API key ends up in browser bundle anyway (client-side usage)
 
 ### Components
 

@@ -189,31 +189,43 @@ pnpm dev  # Vite loads from .env automatically
 
 #### Railway (Recommended)
 
-Railway uses **Docker BuildKit secrets** to securely handle API keys:
+Railway uses **ARG/ENV with Sealed Variables** to handle configuration:
 
 1. **Set environment variables** in Railway dashboard:
-   - `VITE_TOGETHER_API_KEY` (your API key)
+   - `VITE_TOGETHER_API_KEY` (your API key) - **Mark as "sealed"**
    - `VITE_TOGETHER_MODEL` (your model name)
 
-2. **Deploy**: Railway automatically:
-   - Detects `--mount=type=secret` in Dockerfile
-   - Passes API key as a build secret (never stored in image layers)
-   - Passes model name as a standard build arg
+2. **Use Sealed Variables** for API keys:
+   - In Railway dashboard, click the variable's menu → **"Seal Variable"**
+   - Sealed variables are:
+     - ✅ Available during builds and deployments
+     - ❌ Hidden from Railway UI (shows as `***`)
+     - ❌ Cannot be retrieved via Railway API
+   - Provides extra security even with ARG/ENV approach
 
-3. **Security**: API key is **NOT** exposed in:
-   - Docker image layers
-   - `docker history` output
-   - `docker inspect` output
+3. **Deploy**: Railway automatically:
+   - Injects env vars at build time
+   - Dockerfile uses `ARG` to receive them
+   - Vite injects values into bundle during build
 
 **How it works:**
 ```dockerfile
-# Dockerfile uses BuildKit secrets
-RUN --mount=type=secret,id=VITE_TOGETHER_API_KEY \
-    VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL \
-    /app/scripts/build-with-secrets.sh
+# Railway injects env vars, Dockerfile receives with ARG
+ARG VITE_TOGETHER_API_KEY
+ARG VITE_TOGETHER_MODEL
+
+# Pass to Vite build
+ENV VITE_TOGETHER_API_KEY=$VITE_TOGETHER_API_KEY
+ENV VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL
+
+RUN pnpm run build
 ```
 
-Railway detects this and automatically mounts secrets during build.
+**Security Notes:**
+- Railway images are **private** (not pushed to public registries)
+- Use **sealed variables** for API keys (hidden from UI/API)
+- API key ends up in browser bundle (unavoidable for client-side APIs)
+- For true secret protection, consider adding a backend proxy
 
 #### Other Platforms (Vercel/Netlify)
 
@@ -231,22 +243,25 @@ Vite will inject these at build time.
 
 ### Testing Docker Build Locally
 
-Test the Docker build with secrets locally:
+Test the Docker build locally:
 
 ```bash
 # Set environment variables
 export VITE_TOGETHER_API_KEY='your-api-key'
 export VITE_TOGETHER_MODEL='meta-llama/Llama-3.3-70B-Instruct-Turbo'
 
-# Run test script (includes security audit)
-./scripts/test-docker-build.sh
+# Build Docker image
+docker build \
+  --build-arg VITE_TOGETHER_API_KEY="$VITE_TOGETHER_API_KEY" \
+  --build-arg VITE_TOGETHER_MODEL="$VITE_TOGETHER_MODEL" \
+  -t translate-and-teach:local \
+  .
+
+# Run the container
+docker run -p 8080:8080 translate-and-teach:local
 ```
 
-This script:
-- ✅ Builds image with BuildKit secrets
-- ✅ Verifies secrets are NOT in `docker history`
-- ✅ Verifies secrets are NOT in `docker inspect`
-- ✅ Confirms build artifacts are correct
+Visit `http://localhost:8080` to test the app.
 
 ---
 
@@ -254,18 +269,17 @@ This script:
 
 **For sensitive data (API keys, passwords):**
 1. Add to `.env` for local dev
-2. Add to Railway env vars
-3. Update `Dockerfile` to mount as secret:
+2. Add to Railway env vars and **mark as sealed**
+3. Add `ARG` declaration in `Dockerfile`:
    ```dockerfile
-   RUN --mount=type=secret,id=YOUR_SECRET_NAME \
-       /app/scripts/build-with-secrets.sh
+   ARG YOUR_SECRET_NAME
+   ENV YOUR_SECRET_NAME=$YOUR_SECRET_NAME
    ```
-4. Update `scripts/build-with-secrets.sh` to read the secret
 
-**For non-sensitive config (URLs, feature flags):**
+**For non-sensitive config (URLs, feature flags, model names):**
 1. Add to `.env` for local dev
-2. Add to Railway env vars
-3. Use standard build arg in `Dockerfile`:
+2. Add to Railway env vars (no need to seal)
+3. Add `ARG` declaration in `Dockerfile`:
    ```dockerfile
    ARG YOUR_CONFIG_NAME
    ENV YOUR_CONFIG_NAME=$YOUR_CONFIG_NAME
@@ -278,9 +292,16 @@ This script:
 ⚠️ **Client-Side API Keys**: The Together.ai API key is injected into the frontend bundle and **visible in the browser**. This is acceptable because:
 - Together.ai is designed for client-side usage
 - Use Together.ai's rate limiting and key restrictions
-- For sensitive use cases, consider a backend proxy (out of current scope)
+- Railway's images are **private** (not pushed to public registries)
+- Use Railway's **sealed variables** to hide keys from UI/API
+- For true secret protection, consider a backend proxy
 
-✅ **Docker Security**: The BuildKit secrets approach prevents API keys from being exposed in Docker **image supply chain** (registry, layers, history), which is the primary security goal.
+✅ **Railway Security Features**:
+- **Sealed Variables**: Hide variable values from Railway UI and API
+- **Private Images**: Docker images stay in Railway's private registry
+- **Build-time Injection**: Variables only exist during build, not persisted
+
+⚠️ **Docker Warning**: You may see `SecretsUsedInArgOrEnv` warning from Docker BuildKit. This is cosmetic - Railway's sealed variables and private images mitigate the risk.
 
 ---
 

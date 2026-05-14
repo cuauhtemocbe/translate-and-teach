@@ -1,7 +1,9 @@
 # ---------- Builder ----------
 FROM node:22-alpine AS builder
 
-# Non-sensitive config via build arg (model name is not a secret)
+# Railway injects environment variables at build time
+# Declare them with ARG to make them available in the build
+ARG VITE_TOGETHER_API_KEY
 ARG VITE_TOGETHER_MODEL
 
 RUN apk add --no-cache git
@@ -16,16 +18,13 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# Make build script available and executable
-RUN mkdir -p /app/scripts
-COPY scripts/build-with-secrets.sh /app/scripts/build-with-secrets.sh
-RUN chmod +x /app/scripts/build-with-secrets.sh
+# Pass build args to environment variables for Vite
+# Note: Use Railway's "sealed variables" feature for extra security
+# Sealed variables are hidden from Railway UI/API but available during builds
+ENV VITE_TOGETHER_API_KEY=$VITE_TOGETHER_API_KEY
+ENV VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL
 
-# Build with secret mount (API key never stored in image layers)
-# Secret is mounted at /run/secrets/VITE_TOGETHER_API_KEY during build only
-RUN --mount=type=secret,id=VITE_TOGETHER_API_KEY \
-    VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL \
-    /app/scripts/build-with-secrets.sh
+RUN pnpm run typecheck && pnpm run build
 
 # ---------- Production ----------
 FROM node:22-alpine AS production
