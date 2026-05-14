@@ -155,35 +155,132 @@ The app uses a comprehensive CSS variable-based design system:
 
 ## 🔒 Configuration & Security
 
-### Required Environment Variables
+### Environment Variables Classification
 
-The following environment variables must be set in your `.env` file:
+This project uses **two types of configuration**:
+
+| Variable | Type | Sensitivity | Method |
+|----------|------|-------------|--------|
+| `VITE_TOGETHER_API_KEY` | **Secret** | 🔴 High (credential) | Docker BuildKit secrets |
+| `VITE_TOGETHER_MODEL` | **Config** | 🟢 Low (identifier) | Standard build arg |
+
+### Development (Local)
+
+Create a `.env` file in the project root:
 
 ```bash
-# Together.ai API Key (required)
+# Together.ai API Key (SENSITIVE - never commit!)
 VITE_TOGETHER_API_KEY=your_api_key_here
 
-# Together.ai Model (required)
+# Together.ai Model (non-sensitive)
 VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
 ```
 
-⚠️ **Important**: Never commit your API key to git!
+⚠️ **Important**: The `.env` file is git-ignored. Your credentials are safe locally.
 
-### Development
-The `.env` file is git-ignored. Your credentials are safe locally.
+Run the app:
+```bash
+pnpm dev  # Vite loads from .env automatically
+```
+
+---
 
 ### Production Deployment
-For production, set both environment variables in your deployment platform:
 
-**Option 1: Environment Variables (Vercel/Netlify)**
+#### Railway (Recommended)
+
+Railway uses **Docker BuildKit secrets** to securely handle API keys:
+
+1. **Set environment variables** in Railway dashboard:
+   - `VITE_TOGETHER_API_KEY` (your API key)
+   - `VITE_TOGETHER_MODEL` (your model name)
+
+2. **Deploy**: Railway automatically:
+   - Detects `--mount=type=secret` in Dockerfile
+   - Passes API key as a build secret (never stored in image layers)
+   - Passes model name as a standard build arg
+
+3. **Security**: API key is **NOT** exposed in:
+   - Docker image layers
+   - `docker history` output
+   - `docker inspect` output
+
+**How it works:**
+```dockerfile
+# Dockerfile uses BuildKit secrets
+RUN --mount=type=secret,id=VITE_TOGETHER_API_KEY \
+    VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL \
+    /app/scripts/build-with-secrets.sh
+```
+
+Railway detects this and automatically mounts secrets during build.
+
+#### Other Platforms (Vercel/Netlify)
+
+For platforms without Docker:
+
 ```bash
 # Set in deployment platform dashboard
 VITE_TOGETHER_API_KEY=your_key_here
 VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
 ```
 
-**Option 2: API Proxy (Recommended)**
-Create a serverless function that proxies requests to Together.ai without exposing the key.
+Vite will inject these at build time.
+
+---
+
+### Testing Docker Build Locally
+
+Test the Docker build with secrets locally:
+
+```bash
+# Set environment variables
+export VITE_TOGETHER_API_KEY='your-api-key'
+export VITE_TOGETHER_MODEL='meta-llama/Llama-3.3-70B-Instruct-Turbo'
+
+# Run test script (includes security audit)
+./scripts/test-docker-build.sh
+```
+
+This script:
+- ✅ Builds image with BuildKit secrets
+- ✅ Verifies secrets are NOT in `docker history`
+- ✅ Verifies secrets are NOT in `docker inspect`
+- ✅ Confirms build artifacts are correct
+
+---
+
+### Adding New Configuration
+
+**For sensitive data (API keys, passwords):**
+1. Add to `.env` for local dev
+2. Add to Railway env vars
+3. Update `Dockerfile` to mount as secret:
+   ```dockerfile
+   RUN --mount=type=secret,id=YOUR_SECRET_NAME \
+       /app/scripts/build-with-secrets.sh
+   ```
+4. Update `scripts/build-with-secrets.sh` to read the secret
+
+**For non-sensitive config (URLs, feature flags):**
+1. Add to `.env` for local dev
+2. Add to Railway env vars
+3. Use standard build arg in `Dockerfile`:
+   ```dockerfile
+   ARG YOUR_CONFIG_NAME
+   ENV YOUR_CONFIG_NAME=$YOUR_CONFIG_NAME
+   ```
+
+---
+
+### Security Notes
+
+⚠️ **Client-Side API Keys**: The Together.ai API key is injected into the frontend bundle and **visible in the browser**. This is acceptable because:
+- Together.ai is designed for client-side usage
+- Use Together.ai's rate limiting and key restrictions
+- For sensitive use cases, consider a backend proxy (out of current scope)
+
+✅ **Docker Security**: The BuildKit secrets approach prevents API keys from being exposed in Docker **image supply chain** (registry, layers, history), which is the primary security goal.
 
 ---
 
