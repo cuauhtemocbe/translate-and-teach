@@ -1,0 +1,79 @@
+/* TranslationTimer Component Styles */
+
+.translation-timer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-top: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-fast);
+}
+
+.translation-timer__text {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+/* Loading state - subtle pulsing animation */
+.translation-timer:not(.translation-timer--completed) {
+  animation: timer-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(0.98);
+  }
+}
+
+/* Completed state - accent color emphasis */
+.translation-timer--completed {
+  background: var(--color-card);
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.translation-timer--completed .translation-timer__text {
+  color: var(--color-accent);
+}
+
+/* Hover state for completed timer (subtle interaction) */
+.translation-timer--completed:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .translation-timer {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .translation-timer__text {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .translation-timer:not(.translation-timer--completed) {
+    animation: none;
+  }
+
+  .translation-timer--completed:hover {
+    transform: none;
+  }
+}

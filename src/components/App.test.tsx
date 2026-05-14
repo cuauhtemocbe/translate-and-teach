@@ -148,4 +148,62 @@ Hi, Hey`;
     const input = screen.getByPlaceholderText(/Escribe una frase/i);
     expect(input).toHaveAccessibleName();
   });
+
+  describe('Timer functionality', () => {
+    it('should show elapsed time after successful translation', async () => {
+      vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(
+        '## Principal Translation\nHello'
+      );
+
+      const user = userEvent.setup();
+      render(<App />);
+
+      const input = screen.getByPlaceholderText(/Escribe una frase/i);
+      await user.type(input, 'Hola');
+
+      const button = screen.getByRole('button', { name: /Generar traducción/i });
+      await user.click(button);
+
+      // Verify timer appears with completion message
+      await waitFor(() => {
+        expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
+      });
+
+      // Verify time is displayed (should show some decimal like X.Xs)
+      const timerText = screen.getByText(/Translation completed in/i).textContent;
+      expect(timerText).toMatch(/Translation completed in \d+\.\d+s/);
+    });
+
+    it('should show elapsed time even when API fails', async () => {
+      vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
+        new Error('API error')
+      );
+
+      const user = userEvent.setup();
+      render(<App />);
+
+      const input = screen.getByPlaceholderText(/Escribe una frase/i);
+      await user.type(input, 'Test');
+
+      const button = screen.getByRole('button', { name: /Generar traducción/i });
+      await user.click(button);
+
+      // Timer should still appear even on error
+      await waitFor(() => {
+        expect(screen.getByText(/Translation completed in/i)).toBeInTheDocument();
+      });
+
+      // Verify time is displayed
+      const timerText = screen.getByText(/Translation completed in/i).textContent;
+      expect(timerText).toMatch(/Translation completed in \d+\.\d+s/);
+    });
+
+    it('should not show timer before first translation', () => {
+      render(<App />);
+
+      // Timer should not be visible initially
+      expect(screen.queryByText(/Translation completed in/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Translating\.\.\./i)).not.toBeInTheDocument();
+    });
+  });
 });

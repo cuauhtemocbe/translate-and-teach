@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { InputSection } from './components/InputSection';
 import { ResultsGrid } from './components/ResultsGrid';
 import { ThemeToggle } from './components/ThemeToggle';
+import { TranslationTimer } from './components/TranslationTimer';
 import { useTheme } from './hooks/useTheme';
 import { translatePhrase } from './services/togetherApi';
 import { parseResponse } from './utils/parseResponse';
@@ -18,6 +19,7 @@ export function App() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<TranslationResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [elapsedTime, setElapsedTime] = useState<number | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const { theme, toggleTheme } = useTheme();
 
@@ -34,10 +36,19 @@ export function App() {
     setLoading(true);
     setError(null);
     setResults(null);
+    setElapsedTime(null);
+
+    // Start timer
+    const startTime = performance.now();
 
     try {
       // Call API
       const response = await translatePhrase(input.trim());
+
+      // Stop timer and calculate elapsed time
+      const endTime = performance.now();
+      const elapsed = (endTime - startTime) / 1000; // Convert to seconds
+      setElapsedTime(elapsed);
 
       // Parse response
       const parsed = parseResponse(response);
@@ -45,6 +56,11 @@ export function App() {
       // Set results
       setResults(parsed);
     } catch (err) {
+      // Stop timer even on error
+      const endTime = performance.now();
+      const elapsed = (endTime - startTime) / 1000;
+      setElapsedTime(elapsed);
+
       // Handle errors
       const errorMessage = err instanceof Error
         ? err.message
@@ -80,6 +96,8 @@ export function App() {
           loading={loading}
           error={error}
         />
+
+        <TranslationTimer isLoading={loading} elapsedTime={elapsedTime} />
 
         {results && (
           <div
