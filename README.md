@@ -33,6 +33,7 @@ AI-powered Spanish to English translation with grammatical analysis, learning ti
 - **Node.js** >= 22.0.0
 - **pnpm** >= 9.0.0
 - **Together.ai API Key** ([Get one here](https://api.together.xyz/settings/api-keys))
+- **[gitleaks](https://github.com/gitleaks/gitleaks#installing)** — required by the pre-commit hook, which scans staged changes for secrets before every commit (`brew install gitleaks`, or download a binary from the [releases page](https://github.com/gitleaks/gitleaks/releases))
 
 ### Installation
 
@@ -262,6 +263,8 @@ docker run -p 8080:8080 translate-and-teach:local
 ```
 
 Visit `http://localhost:8080` to test the app.
+
+**Base image pinning**: `Dockerfile`'s `builder` and `production` stages pin `node:22-alpine` by digest (`@sha256:...`) for byte-for-byte reproducible production builds. `Dockerfile.dev` deliberately stays on the floating tag, since local development benefits more from automatic security patches on rebuild than from exact reproducibility. Dependabot (`docker` ecosystem, `.github/dependabot.yml`) keeps the pinned digest current.
 
 ---
 

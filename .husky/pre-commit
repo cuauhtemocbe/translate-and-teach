@@ -1,5 +1,18 @@
 #!/bin/sh
 
-# Skip validations on regular commits for faster development
-echo "⚡ Skipping validations on regular commit (validations run on merge only)"
+echo "🔒 Scanning staged changes for secrets..."
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+    echo "❌ gitleaks not found on PATH. Install it before committing (see README Prerequisites)."
+    exit 1
+fi
+
+if ! gitleaks protect --staged --redact --no-banner; then
+    echo "❌ gitleaks detected a potential secret in the staged diff. Commit aborted."
+    exit 1
+fi
+echo "✅ No secrets detected in staged changes."
+
+# Skip other validations on regular commits for faster development
+echo "⚡ Skipping other validations on regular commit (full validation runs on merge only)"
 exit 0

@@ -294,6 +294,17 @@ See `/trivy-scan` skill for detailed usage and examples.
 
 ---
 
+## Security Hardening
+
+Concrete measures in place beyond the `/trivy-scan` skill (tracked under the "Security Hardening" GitHub milestone):
+
+- **Dependabot** (`.github/dependabot.yml`): weekly updates for the `npm`, `docker`, and `github-actions` ecosystems, so dependency and base-image bumps don't rely on someone remembering to check manually.
+- **Socket Firewall on Dependabot PRs** (`.github/workflows/dependabot-socket-firewall.yml`): this repo has no general hosted CI gate for human PRs (local `scripts/validate.sh` + husky hooks cover that case) — but Dependabot PRs are bot-authored and never hand-reviewed line by line, which is a different risk profile. This workflow triggers only for `dependabot[bot]`, reinstalls the PR's dependencies through Socket Firewall Free (`sfw pnpm install`), and auto-closes the PR with an explanatory comment if `sfw` blocks a known-malicious package. Requires `permissions: pull-requests: write` explicitly, since Dependabot-triggered workflows get a read-only token by default. Third-party actions (`actions/checkout`, `SocketDev/action`) are pinned by commit SHA, not a floating tag.
+- **Production Docker image pinned by digest**: `Dockerfile`'s `builder` and `production` stages pin `node:22-alpine` with `@sha256:...` for byte-for-byte reproducible builds. `Dockerfile.dev` intentionally stays on the floating tag — dev benefits more from automatic security patches on rebuild than from exact reproducibility. This asymmetry is deliberate, not an oversight.
+- **Pre-commit secret scanning** (`.husky/pre-commit`): `gitleaks` scans the staged diff before every commit, so a leaked `VITE_TOGETHER_API_KEY` (or similar) is caught locally before it ever reaches git history — this repo has no hosted CI as a second line of defense for human-authored commits.
+
+---
+
 ## Code Quality Analysis
 
 Use the `/sonar-check` skill to validate code quality metrics:

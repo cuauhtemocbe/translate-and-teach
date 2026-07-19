@@ -52,7 +52,8 @@
     "jsdom": "^25.0.1",
     "lint-staged": "^16.4.0",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.5",
+    "yaml": "2.9.0"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
