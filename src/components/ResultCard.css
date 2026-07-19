@@ -14,7 +14,7 @@
 
 /* Top accent border (reveals on hover) */
 .result-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -28,7 +28,7 @@
 
 /* Subtle glow effect */
 .result-card::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -113,21 +113,21 @@
 
 /* Distinctive Variant Styles - Set accent colors as CSS variables */
 .result-card--translation {
-  --card-accent-color: #2563EB;
-  border-left-color: #2563EB;
+  --card-accent-color: #2563eb;
+  border-left-color: #2563eb;
 }
 
 .result-card--translation .result-card-header {
-  border-bottom-color: #2563EB;
+  border-bottom-color: #2563eb;
 }
 
 .result-card--grammar {
-  --card-accent-color: #7C3AED;
-  border-left-color: #7C3AED;
+  --card-accent-color: #7c3aed;
+  border-left-color: #7c3aed;
 }
 
 .result-card--grammar .result-card-header {
-  border-bottom-color: #7C3AED;
+  border-bottom-color: #7c3aed;
 }
 
 .result-card--tips {

@@ -11,7 +11,7 @@
 
 /* Decorative accent bar */
 .header::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -65,7 +65,7 @@
 /* Decorative lines around tagline */
 .header-tagline::before,
 .header-tagline::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   width: 40px;

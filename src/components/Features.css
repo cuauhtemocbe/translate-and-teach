@@ -58,7 +58,7 @@
 
 /* Accent border on top */
 .feature-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -72,17 +72,13 @@
 
 /* Subtle glow effect */
 .feature-card::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at 50% 0%,
-    var(--accent-color),
-    transparent 70%
-  );
+  background: radial-gradient(circle at 50% 0%, var(--accent-color), transparent 70%);
   opacity: 0;
   transition: opacity 0.4s ease;
   pointer-events: none;

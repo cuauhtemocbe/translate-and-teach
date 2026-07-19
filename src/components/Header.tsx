@@ -6,7 +6,7 @@ import './Header.css';
  */
 export function Header() {
   return (
-    <header className="header" role="banner">
+    <header className="header">
       <div className="header-container">
         <h1 className="header-title">
           <span className="header-icon">🌐</span>

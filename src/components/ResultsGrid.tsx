@@ -25,12 +25,7 @@ export function ResultsGrid({ results }: ResultsGridProps) {
         icon="📖"
         variant="grammar"
       />
-      <ResultCard
-        title="Learning Key"
-        content={results.learningKey}
-        icon="💡"
-        variant="tips"
-      />
+      <ResultCard title="Learning Key" content={results.learningKey} icon="💡" variant="tips" />
       <ResultCard
         title="Technical Variations"
         content={results.technicalVariations}

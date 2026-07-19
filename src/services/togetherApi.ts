@@ -28,7 +28,7 @@ function getApiKey(apiKeyOverride?: string): string {
 
   if (!apiKey || apiKey === 'your_api_key_here') {
     throw new Error(
-      'Together.ai API key not configured. Please set VITE_TOGETHER_API_KEY in your .env file.'
+      'Together.ai API key not configured. Please set VITE_TOGETHER_API_KEY in your .env file.',
     );
   }
 
@@ -43,7 +43,7 @@ function getModel(): string {
 
   if (!model || model.trim() === '') {
     throw new Error(
-      'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+      'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.',
     );
   }
 
@@ -60,7 +60,7 @@ function getModel(): string {
  */
 export async function translatePhrase(
   spanishPhrase: string,
-  apiKeyOverride?: string
+  apiKeyOverride?: string,
 ): Promise<string> {
   // Validate input
   if (!spanishPhrase || spanishPhrase.trim() === '') {
@@ -76,23 +76,23 @@ export async function translatePhrase(
     messages: [
       {
         role: 'system',
-        content: SYSTEM_PROMPT
+        content: SYSTEM_PROMPT,
       },
       {
         role: 'user',
-        content: `Spanish phrase: "${spanishPhrase.trim()}"`
-      }
-    ]
+        content: `Spanish phrase: "${spanishPhrase.trim()}"`,
+      },
+    ],
   };
 
   try {
     const response = await fetch(TOGETHER_API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify(requestBody),
     });
 
     // Handle rate limiting
@@ -113,7 +113,6 @@ export async function translatePhrase(
     }
 
     return data.choices[0].message.content;
-
   } catch (error) {
     // Re-throw custom errors as-is
     if (error instanceof Error && error.message.startsWith('API error')) {

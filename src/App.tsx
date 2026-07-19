@@ -1,13 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
-import { Hero } from './components/Hero';
+import { useEffect, useRef, useState } from 'react';
 import { Features } from './components/Features';
+import { Hero } from './components/Hero';
 import { InputSection } from './components/InputSection';
 import { ResultsGrid } from './components/ResultsGrid';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useTheme } from './hooks/useTheme';
 import { translatePhrase } from './services/togetherApi';
-import { parseResponse } from './utils/parseResponse';
 import type { TranslationResponse } from './types';
+import { parseResponse } from './utils/parseResponse';
 import './styles/globals.css';
 
 /**
@@ -91,9 +91,10 @@ export function App() {
       setElapsedTime(elapsed);
 
       // Handle errors
-      const errorMessage = err instanceof Error
-        ? err.message
-        : 'Ocurrió un error al generar la traducción. Intenta de nuevo.';
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Ocurrió un error al generar la traducción. Intenta de nuevo.';
 
       setError(errorMessage);
 
@@ -173,8 +174,8 @@ export function App() {
               aria-label="Together.ai (opens in new tab)"
             >
               Together.ai
-            </a>
-            {' '}using Llama-3.3-70B
+            </a>{' '}
+            using Llama-3.3-70B
           </p>
         </div>
       </footer>

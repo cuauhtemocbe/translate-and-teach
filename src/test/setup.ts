@@ -4,14 +4,14 @@
 import '@testing-library/jest-dom/vitest';
 
 // Global test setup
-console.log("Test setup initialized");
+console.log('Test setup initialized');
 
 // Mock environment variables for testing
 Object.defineProperty(import.meta, 'env', {
   value: {
     ...import.meta.env,
-    VITE_TOGETHER_API_KEY: 'test-api-key-12345'
+    VITE_TOGETHER_API_KEY: 'test-api-key-12345',
   },
   configurable: true,
-  writable: true
+  writable: true,
 });

@@ -14,7 +14,15 @@ interface InputSectionProps {
  * InputSection component
  * Contains textarea input and submit button
  */
-export function InputSection({ value, onChange, onSubmit, loading, error, elapsedTime, showCompletion }: InputSectionProps) {
+export function InputSection({
+  value,
+  onChange,
+  onSubmit,
+  loading,
+  error,
+  elapsedTime,
+  showCompletion,
+}: InputSectionProps) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Submit on Ctrl+Enter or Cmd+Enter
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -43,12 +51,15 @@ export function InputSection({ value, onChange, onSubmit, loading, error, elapse
 
         {error && (
           <div id="input-error" className="error-message" role="alert">
-            <span className="error-icon" aria-hidden="true">⚠️</span>
+            <span className="error-icon" aria-hidden="true">
+              ⚠️
+            </span>
             {error}
           </div>
         )}
 
         <button
+          type="button"
           className="submit-button"
           onClick={onSubmit}
           disabled={loading || !value.trim()}

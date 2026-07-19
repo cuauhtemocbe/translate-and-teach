@@ -3,9 +3,9 @@
  * Tests timer + markdown rendering working together
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import * as togetherApi from '../services/togetherApi';
 
@@ -67,12 +67,12 @@ Variations here`;
       // Step 6: Verify markdown is rendered (bold)
       const strongElements = container.querySelectorAll('strong');
       expect(strongElements.length).toBeGreaterThan(0);
-      expect(Array.from(strongElements).some(el => el.textContent === 'main')).toBe(true);
+      expect(Array.from(strongElements).some((el) => el.textContent === 'main')).toBe(true);
 
       // Step 7: Verify markdown is rendered (italic)
       const emElements = container.querySelectorAll('em');
       expect(emElements.length).toBeGreaterThan(0);
-      expect(Array.from(emElements).some(el => el.textContent === 'emphasis')).toBe(true);
+      expect(Array.from(emElements).some((el) => el.textContent === 'emphasis')).toBe(true);
 
       // Step 8: Verify markdown is rendered (bullet list)
       const ulElements = container.querySelectorAll('ul');
@@ -90,9 +90,7 @@ Variations here`;
     });
 
     it('should show timer even when API fails', async () => {
-      vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
-        new Error('Network error')
-      );
+      vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(new Error('Network error'));
 
       const user = userEvent.setup();
       render(<App />);
@@ -164,8 +162,8 @@ Second variation example.`;
       expect(screen.getByText(/Completado en/i)).toBeInTheDocument();
 
       // Verify first markdown (bold "first")
-      let strongElements = container.querySelectorAll('strong');
-      expect(Array.from(strongElements).some(el => el.textContent === 'first')).toBe(true);
+      const strongElements = container.querySelectorAll('strong');
+      expect(Array.from(strongElements).some((el) => el.textContent === 'first')).toBe(true);
 
       // Second translation
       await user.clear(input);
@@ -175,7 +173,7 @@ Second variation example.`;
       await waitFor(() => {
         // Check for the italic "second" in the translation
         const emElements = container.querySelectorAll('em');
-        expect(Array.from(emElements).some(el => el.textContent === 'second')).toBe(true);
+        expect(Array.from(emElements).some((el) => el.textContent === 'second')).toBe(true);
       });
 
       // Verify button still shows completion (reset and updated)
@@ -183,7 +181,7 @@ Second variation example.`;
 
       // Verify second markdown (italic "second")
       const emElements = container.querySelectorAll('em');
-      expect(Array.from(emElements).some(el => el.textContent === 'second')).toBe(true);
+      expect(Array.from(emElements).some((el) => el.textContent === 'second')).toBe(true);
 
       // First content should be gone
       expect(screen.queryByText(/first/i)).not.toBeInTheDocument();

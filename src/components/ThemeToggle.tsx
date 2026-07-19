@@ -13,6 +13,7 @@ interface ThemeToggleProps {
 export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
   return (
     <button
+      type="button"
       className="theme-toggle"
       onClick={onToggle}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
@@ -21,9 +22,7 @@ export function ThemeToggle({ theme, onToggle }: ThemeToggleProps) {
       <span className="theme-toggle-icon" aria-hidden="true">
         {theme === 'light' ? '🌙' : '☀️'}
       </span>
-      <span className="theme-toggle-text">
-        {theme === 'light' ? 'Dark' : 'Light'}
-      </span>
+      <span className="theme-toggle-text">{theme === 'light' ? 'Dark' : 'Light'}</span>
     </button>
   );
 }

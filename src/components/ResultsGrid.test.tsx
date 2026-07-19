@@ -1,7 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ResultsGrid } from './ResultsGrid';
+import { describe, expect, it } from 'vitest';
 import type { TranslationResponse } from '../types';
+import { ResultsGrid } from './ResultsGrid';
 
 describe('ResultsGrid', () => {
   const mockResults: TranslationResponse = {

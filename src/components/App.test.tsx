@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import * as togetherApi from '../services/togetherApi';
 
@@ -58,7 +58,7 @@ Hi, Hey`;
 
   it('should display error message on API failure', async () => {
     vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
-      new Error('API error: 500 Internal Server Error')
+      new Error('API error: 500 Internal Server Error'),
     );
 
     const user = userEvent.setup();
@@ -80,7 +80,8 @@ Hi, Hey`;
 
   it('should show loading state during API call', async () => {
     vi.mocked(togetherApi.translatePhrase).mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve('## Principal Translation\nTest'), 100))
+      () =>
+        new Promise((resolve) => setTimeout(() => resolve('## Principal Translation\nTest'), 100)),
     );
 
     const user = userEvent.setup();
@@ -103,9 +104,7 @@ Hi, Hey`;
 
   it('should clear error on new submission', async () => {
     // First submission fails
-    vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
-      new Error('Network error')
-    );
+    vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(new Error('Network error'));
 
     const user = userEvent.setup();
     render(<App />);
@@ -122,7 +121,7 @@ Hi, Hey`;
 
     // Second submission succeeds
     vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(
-      '## Principal Translation\nSuccess'
+      '## Principal Translation\nSuccess',
     );
 
     await user.clear(input);
@@ -153,7 +152,7 @@ Hi, Hey`;
   describe('Timer functionality', () => {
     it('should show elapsed time on button after successful translation', async () => {
       vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(
-        '## Principal Translation\nHello'
+        '## Principal Translation\nHello',
       );
 
       const user = userEvent.setup();
@@ -176,9 +175,7 @@ Hi, Hey`;
     });
 
     it('should show elapsed time on button even when API fails', async () => {
-      vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
-        new Error('API error')
-      );
+      vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(new Error('API error'));
 
       const user = userEvent.setup();
       render(<App />);

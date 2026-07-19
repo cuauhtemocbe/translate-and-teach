@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
 import { ResultCard } from './ResultCard';
 
 describe('ResultCard', () => {
@@ -10,7 +10,7 @@ describe('ResultCard', () => {
         content="How are you?"
         icon="🌐"
         variant="translation"
-      />
+      />,
     );
 
     expect(screen.getByText('Principal Translation')).toBeInTheDocument();
@@ -20,12 +20,7 @@ describe('ResultCard', () => {
 
   it('should apply correct variant class', () => {
     const { container } = render(
-      <ResultCard
-        title="Test"
-        content="Content"
-        icon="✓"
-        variant="grammar"
-      />
+      <ResultCard title="Test" content="Content" icon="✓" variant="grammar" />,
     );
 
     const card = container.querySelector('.result-card');
@@ -34,14 +29,7 @@ describe('ResultCard', () => {
 
   it('should render multiline content', () => {
     const content = 'Line 1\nLine 2\nLine 3';
-    render(
-      <ResultCard
-        title="Test"
-        content={content}
-        icon="✓"
-        variant="translation"
-      />
-    );
+    render(<ResultCard title="Test" content={content} icon="✓" variant="translation" />);
 
     expect(screen.getByText(/Line 1/)).toBeInTheDocument();
     expect(screen.getByText(/Line 2/)).toBeInTheDocument();
@@ -49,14 +37,7 @@ describe('ResultCard', () => {
   });
 
   it('should have proper semantic HTML with region role', () => {
-    render(
-      <ResultCard
-        title="Learning Key"
-        content="Tips here"
-        icon="💡"
-        variant="tips"
-      />
-    );
+    render(<ResultCard title="Learning Key" content="Tips here" icon="💡" variant="tips" />);
 
     const region = screen.getByRole('region', { name: 'Learning Key' });
     expect(region).toBeInTheDocument();
@@ -70,7 +51,7 @@ describe('ResultCard', () => {
           content="This is **bold text** in a sentence"
           icon="✓"
           variant="translation"
-        />
+        />,
       );
 
       const strong = container.querySelector('strong');
@@ -85,7 +66,7 @@ describe('ResultCard', () => {
           content="This is *italic text* in a sentence"
           icon="✓"
           variant="translation"
-        />
+        />,
       );
 
       const em = container.querySelector('em');
@@ -100,12 +81,7 @@ describe('ResultCard', () => {
 - Third tip`;
 
       const { container } = render(
-        <ResultCard
-          title="Test"
-          content={content}
-          icon="✓"
-          variant="tips"
-        />
+        <ResultCard title="Test" content={content} icon="✓" variant="tips" />,
       );
 
       const ul = container.querySelector('ul');
@@ -125,12 +101,7 @@ describe('ResultCard', () => {
 3. Third step`;
 
       const { container } = render(
-        <ResultCard
-          title="Test"
-          content={content}
-          icon="✓"
-          variant="grammar"
-        />
+        <ResultCard title="Test" content={content} icon="✓" variant="grammar" />,
       );
 
       const ol = container.querySelector('ol');
@@ -150,7 +121,7 @@ describe('ResultCard', () => {
           content="This has `inline code` which should not render as code"
           icon="✓"
           variant="translation"
-        />
+        />,
       );
 
       const code = container.querySelector('code');
@@ -167,7 +138,7 @@ describe('ResultCard', () => {
           content="This has [a link](https://example.com) which should not render as a link"
           icon="✓"
           variant="translation"
-        />
+        />,
       );
 
       const link = container.querySelector('a');
@@ -186,12 +157,7 @@ describe('ResultCard', () => {
 Done!`;
 
       const { container } = render(
-        <ResultCard
-          title="Test"
-          content={content}
-          icon="✓"
-          variant="tips"
-        />
+        <ResultCard title="Test" content={content} icon="✓" variant="tips" />,
       );
 
       expect(container.querySelector('strong')).toBeInTheDocument();

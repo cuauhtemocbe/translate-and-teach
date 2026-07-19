@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { translatePhrase } from './togetherApi';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TogetherAIResponse } from '../types';
+import { translatePhrase } from './togetherApi';
 
 // Mock fetch globally
 global.fetch = vi.fn();
@@ -15,10 +15,11 @@ describe('togetherApi', () => {
   it('should successfully translate a Spanish phrase', async () => {
     const mockResponse: TogetherAIResponse = {
       id: 'test-id',
-      choices: [{
-        message: {
-          role: 'assistant',
-          content: `## Principal Translation
+      choices: [
+        {
+          message: {
+            role: 'assistant',
+            content: `## Principal Translation
 Hello
 
 ## Grammatical Analysis
@@ -28,20 +29,21 @@ Simple greeting
 Common phrase
 
 ## Technical Variations
-Hi, Hey`
+Hi, Hey`,
+          },
+          finish_reason: 'stop',
         },
-        finish_reason: 'stop'
-      }],
+      ],
       usage: {
         prompt_tokens: 10,
         completion_tokens: 20,
-        total_tokens: 30
-      }
+        total_tokens: 30,
+      },
     };
 
     (global.fetch as any).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     const result = await translatePhrase('Hola', 'test-api-key');
@@ -54,26 +56,28 @@ Hi, Hey`
         method: 'POST',
         headers: expect.objectContaining({
           'Content-Type': 'application/json',
-        })
-      })
+        }),
+      }),
     );
   });
 
   it('should include correct prompt structure', async () => {
     const mockResponse: TogetherAIResponse = {
       id: 'test-id',
-      choices: [{
-        message: {
-          role: 'assistant',
-          content: 'Test response'
+      choices: [
+        {
+          message: {
+            role: 'assistant',
+            content: 'Test response',
+          },
+          finish_reason: 'stop',
         },
-        finish_reason: 'stop'
-      }]
+      ],
     };
 
     (global.fetch as any).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     await translatePhrase('¿Cómo estás?', 'test-api-key');
@@ -91,27 +95,33 @@ Hi, Hey`
   it('should handle network errors', async () => {
     (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
 
-    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow('Network error. Please check your connection and try again.');
+    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
+      'Network error. Please check your connection and try again.',
+    );
   });
 
   it('should handle API errors with status codes', async () => {
     (global.fetch as any).mockResolvedValueOnce({
       ok: false,
       status: 401,
-      statusText: 'Unauthorized'
+      statusText: 'Unauthorized',
     });
 
-    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow('API error: 401 Unauthorized');
+    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
+      'API error: 401 Unauthorized',
+    );
   });
 
   it('should handle rate limit errors', async () => {
     (global.fetch as any).mockResolvedValueOnce({
       ok: false,
       status: 429,
-      statusText: 'Too Many Requests'
+      statusText: 'Too Many Requests',
     });
 
-    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow('Rate limit exceeded. Please wait a moment and try again.');
+    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
+      'Rate limit exceeded. Please wait a moment and try again.',
+    );
   });
 
   it('should handle malformed API responses', async () => {
@@ -119,11 +129,13 @@ Hi, Hey`
       ok: true,
       json: async () => ({
         // Missing choices array
-        id: 'test-id'
-      })
+        id: 'test-id',
+      }),
     });
 
-    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow('Invalid response from API');
+    await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
+      'Invalid response from API',
+    );
   });
 
   it('should handle empty Spanish phrase', async () => {
@@ -137,18 +149,20 @@ Hi, Hey`
   it('should include API key in headers', async () => {
     const mockResponse: TogetherAIResponse = {
       id: 'test-id',
-      choices: [{
-        message: {
-          role: 'assistant',
-          content: 'Test'
+      choices: [
+        {
+          message: {
+            role: 'assistant',
+            content: 'Test',
+          },
+          finish_reason: 'stop',
         },
-        finish_reason: 'stop'
-      }]
+      ],
     };
 
     (global.fetch as any).mockResolvedValueOnce({
       ok: true,
-      json: async () => mockResponse
+      json: async () => mockResponse,
     });
 
     await translatePhrase('Test', 'test-api-key');
@@ -157,7 +171,7 @@ Hi, Hey`
     const headers = fetchCall[1].headers;
 
     // API key should be included
-    expect(headers['Authorization']).toBe('Bearer test-api-key');
+    expect(headers.Authorization).toBe('Bearer test-api-key');
   });
 
   describe('getModel validation', () => {
@@ -165,7 +179,7 @@ Hi, Hey`
       vi.stubEnv('VITE_TOGETHER_MODEL', undefined);
 
       await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
-        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.',
       );
     });
 
@@ -173,7 +187,7 @@ Hi, Hey`
       vi.stubEnv('VITE_TOGETHER_MODEL', '');
 
       await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
-        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.',
       );
     });
 
@@ -181,7 +195,7 @@ Hi, Hey`
       vi.stubEnv('VITE_TOGETHER_MODEL', '   ');
 
       await expect(translatePhrase('Hola', 'test-api-key')).rejects.toThrow(
-        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.'
+        'Together.ai model not configured. Please set VITE_TOGETHER_MODEL in your .env file.',
       );
     });
 
@@ -190,18 +204,20 @@ Hi, Hey`
 
       const mockResponse: TogetherAIResponse = {
         id: 'test-id',
-        choices: [{
-          message: {
-            role: 'assistant',
-            content: 'Test response'
+        choices: [
+          {
+            message: {
+              role: 'assistant',
+              content: 'Test response',
+            },
+            finish_reason: 'stop',
           },
-          finish_reason: 'stop'
-        }]
+        ],
       };
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => mockResponse
+        json: async () => mockResponse,
       });
 
       await translatePhrase('Hola', 'test-api-key');

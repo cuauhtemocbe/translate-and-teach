@@ -1,6 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
 import { InputSection } from './InputSection';
 
 describe('InputSection', () => {
@@ -14,7 +14,7 @@ describe('InputSection', () => {
         error={null}
         elapsedTime={null}
         showCompletion={false}
-      />
+      />,
     );
 
     expect(screen.getByPlaceholderText(/Escribe una frase/i)).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('InputSection', () => {
         error={null}
         elapsedTime={null}
         showCompletion={false}
-      />
+      />,
     );
 
     const input = screen.getByPlaceholderText(/Escribe una frase/i);
@@ -56,7 +56,7 @@ describe('InputSection', () => {
         error={null}
         elapsedTime={null}
         showCompletion={false}
-      />
+      />,
     );
 
     const button = screen.getByRole('button', { name: /Generar traducción/i });
@@ -75,7 +75,7 @@ describe('InputSection', () => {
         error={null}
         elapsedTime={null}
         showCompletion={false}
-      />
+      />,
     );
 
     const input = screen.getByPlaceholderText(/Escribe una frase/i);
@@ -95,7 +95,7 @@ describe('InputSection', () => {
         error={null}
         elapsedTime={null}
         showCompletion={false}
-      />
+      />,
     );
 
     expect(screen.getByText(/Traduciendo/i)).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('InputSection', () => {
         error="API error occurred"
         elapsedTime={null}
         showCompletion={false}
-      />
+      />,
     );
 
     expect(screen.getByText(/API error occurred/i)).toBeInTheDocument();
@@ -127,7 +127,7 @@ describe('InputSection', () => {
         error={null}
         elapsedTime={null}
         showCompletion={false}
-      />
+      />,
     );
 
     const button = screen.getByRole('button');
@@ -145,7 +145,7 @@ describe('InputSection', () => {
           error={null}
           elapsedTime={2.3}
           showCompletion={false}
-        />
+        />,
       );
 
       expect(screen.getByText(/Traduciendo\.\.\. 2\.3s/i)).toBeInTheDocument();
@@ -161,7 +161,7 @@ describe('InputSection', () => {
           error={null}
           elapsedTime={3.7}
           showCompletion={true}
-        />
+        />,
       );
 
       expect(screen.getByText(/Completado en 3\.7s/i)).toBeInTheDocument();
@@ -177,7 +177,7 @@ describe('InputSection', () => {
           error={null}
           elapsedTime={2.0}
           showCompletion={false}
-        />
+        />,
       );
 
       expect(screen.getByText(/Generar traducción/i)).toBeInTheDocument();
@@ -193,7 +193,7 @@ describe('InputSection', () => {
           error={null}
           elapsedTime={null}
           showCompletion={false}
-        />
+        />,
       );
 
       const button = screen.getByRole('button');

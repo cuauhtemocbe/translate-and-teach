@@ -1,5 +1,5 @@
 // Hello World TypeScript Application
-console.log("Hello, World! 🌍");
+console.log('Hello, World! 🌍');
 
 // Simple function to demonstrate TypeScript
 function greetUser(name: string): string {
@@ -10,18 +10,18 @@ function greetUser(name: string): string {
 async function fetchData(): Promise<string> {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve("Data loaded successfully!");
+      resolve('Data loaded successfully!');
     }, 1000);
   });
 }
 
 // Function to add the pipeline element
 function addPipelineElement(): void {
-  const app = document.getElementById("app");
+  const app = document.getElementById('app');
   if (!app) return;
 
   // Add CSS styles for the pipeline
-  const style = document.createElement("style");
+  const style = document.createElement('style');
   style.textContent = `
     .pipeline {
       display: flex;
@@ -126,7 +126,7 @@ function addPipelineElement(): void {
   `;
 
   // Insert the pipeline after the current content
-  app.insertAdjacentHTML("beforeend", pipelineHTML);
+  app.insertAdjacentHTML('beforeend', pipelineHTML);
 
   // Start the animation loop
   playLoop();
@@ -138,18 +138,18 @@ async function playLoop(): Promise<void> {
     return new Promise((res) => setTimeout(res, ms));
   }
 
-  const steps = ["step1", "step2", "step3"];
+  const steps = ['step1', 'step2', 'step3'];
 
   while (true) {
     steps.forEach((id) => {
       const element = document.getElementById(id);
-      if (element) element.classList.remove("visible");
+      if (element) element.classList.remove('visible');
     });
     await delay(500);
 
     for (const stepId of steps) {
       const element = document.getElementById(stepId);
-      if (element) element.classList.add("visible");
+      if (element) element.classList.add('visible');
       await delay(1500);
     }
 
@@ -158,21 +158,21 @@ async function playLoop(): Promise<void> {
 }
 
 // Initialize the application
-const userName = "Developer";
+const userName = 'Developer';
 const greeting = greetUser(userName);
 
 console.log(greeting);
 
 // Update DOM if we're in a browser environment
-if (typeof document === "undefined") {
+if (typeof document === 'undefined') {
   try {
     const data = await fetchData();
     console.log(data);
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error('Error fetching data:', error);
   }
 } else {
-  const app = document.getElementById("app");
+  const app = document.getElementById('app');
   if (app) {
     app.innerHTML = `
       <div style="padding: 3rem 2rem; text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; max-width: 500px; margin: 0 auto;">
@@ -199,7 +199,7 @@ if (typeof document === "undefined") {
       </div>
     `;
 
-    const statusEl = document.getElementById("status");
+    const statusEl = document.getElementById('status');
     if (statusEl) {
       try {
         const data = await fetchData();
@@ -225,4 +225,4 @@ if (typeof document === "undefined") {
 }
 
 // Export for testing
-export { greetUser, fetchData };
+export { fetchData, greetUser };

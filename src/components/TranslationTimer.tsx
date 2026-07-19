@@ -30,18 +30,14 @@ export function TranslationTimer({ isLoading, elapsedTime }: TranslationTimerPro
   if (isLoading) {
     return (
       <div className="translation-timer" role="status" aria-live="polite">
-        <span className="translation-timer__text">
-          Translating... {formattedTime}s
-        </span>
+        <span className="translation-timer__text">Translating... {formattedTime}s</span>
       </div>
     );
   }
 
   return (
     <div className="translation-timer translation-timer--completed">
-      <span className="translation-timer__text">
-        Translation completed in {formattedTime}s
-      </span>
+      <span className="translation-timer__text">Translation completed in {formattedTime}s</span>
     </div>
   );
 }

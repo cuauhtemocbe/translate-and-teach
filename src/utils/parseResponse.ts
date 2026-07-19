@@ -25,9 +25,7 @@ export function parseResponse(markdown: string): TranslationResponse {
 
   // Helper function to find and extract section content
   const findSection = (title: string): string => {
-    const section = sections.find(s =>
-      s.toLowerCase().startsWith(title.toLowerCase())
-    );
+    const section = sections.find((s) => s.toLowerCase().startsWith(title.toLowerCase()));
 
     if (!section) return '';
 
