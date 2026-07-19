@@ -9,6 +9,14 @@ if ! command -v pnpm &> /dev/null; then
     exit 1
 fi
 
+# Run lint
+echo "🧹 Running lint..."
+if ! pnpm run lint; then
+    echo "❌ Lint failed"
+    exit 1
+fi
+echo "✅ Lint passed"
+
 # Run type checking
 echo "📝 Running TypeScript type checking..."
 if ! pnpm run typecheck; then
