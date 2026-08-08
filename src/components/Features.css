@@ -168,3 +168,20 @@
     padding: var(--spacing-lg);
   }
 }
+
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .feature-card,
+  .feature-card::before,
+  .feature-card::after,
+  .feature-icon-wrapper,
+  .feature-icon {
+    animation: none;
+    transition: none;
+  }
+
+  .feature-card:hover,
+  .feature-card:hover .feature-icon-wrapper {
+    transform: none;
+  }
+}
