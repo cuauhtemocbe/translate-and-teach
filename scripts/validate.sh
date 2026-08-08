@@ -9,6 +9,16 @@ if ! command -v pnpm &> /dev/null; then
     exit 1
 fi
 
+# Check CHANGELOG.md is in sync with package.json's version
+echo "📋 Checking CHANGELOG.md version sync..."
+PKG_VERSION=$(node -p "require('./package.json').version")
+CHANGELOG_VERSION=$(grep -m1 -oE '^## \[[0-9]+\.[0-9]+\.[0-9]+\]' CHANGELOG.md | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+if [ "$PKG_VERSION" != "$CHANGELOG_VERSION" ]; then
+    echo "❌ Version mismatch: package.json is $PKG_VERSION but CHANGELOG.md's latest versioned entry is $CHANGELOG_VERSION"
+    exit 1
+fi
+echo "✅ CHANGELOG.md version matches package.json ($PKG_VERSION)"
+
 # Run lint
 echo "🧹 Running lint..."
 if ! pnpm run lint; then
