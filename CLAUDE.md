@@ -335,6 +335,8 @@ Use the `/sonar-check` skill to validate code quality metrics:
 
 **Scoped analysis**: For fix-loop iterations, analyze only changed code (faster feedback)
 
+**Bootstrap gotcha**: `.mcp.json` (which holds `SONARQUBE_PROJECT_KEY`) is gitignored and local-only, so git never catches a stale value. If this repo's `.mcp.json` was copied from another project when setting up SonarQube, verify `SONARQUBE_PROJECT_KEY` matches `sonar.projectKey` in `sonar-project.properties` before trusting any MCP result — tools that don't accept an explicit `projectKey` fall back to the env var silently.
+
 See `/sonar-check` skill for setup and detailed usage.
 
 ---
