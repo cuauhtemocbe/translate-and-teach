@@ -302,6 +302,7 @@ Concrete measures in place beyond the `/trivy-scan` skill (tracked under the "Se
 - **Socket Firewall on Dependabot PRs** (`.github/workflows/dependabot-socket-firewall.yml`): this repo has no general hosted CI gate for human PRs (local `scripts/validate.sh` + husky hooks cover that case) — but Dependabot PRs are bot-authored and never hand-reviewed line by line, which is a different risk profile. This workflow triggers only for `dependabot[bot]`, reinstalls the PR's dependencies through Socket Firewall Free (`sfw pnpm install`), and auto-closes the PR with an explanatory comment if `sfw` blocks a known-malicious package. Requires `permissions: pull-requests: write` explicitly, since Dependabot-triggered workflows get a read-only token by default. Third-party actions (`actions/checkout`, `SocketDev/action`) are pinned by commit SHA, not a floating tag.
 - **Production Docker image pinned by digest**: `Dockerfile`'s `builder` and `production` stages pin `node:22-alpine` with `@sha256:...` for byte-for-byte reproducible builds. `Dockerfile.dev` intentionally stays on the floating tag — dev benefits more from automatic security patches on rebuild than from exact reproducibility. This asymmetry is deliberate, not an oversight.
 - **Pre-commit secret scanning** (`.husky/pre-commit`): `gitleaks` scans the staged diff before every commit, so a leaked `VITE_TOGETHER_API_KEY` (or similar) is caught locally before it ever reaches git history — this repo has no hosted CI as a second line of defense for human-authored commits.
+- **Socket Security GitHub App** (`github.com/apps/socket-security`, installed fleet-wide via "All repositories", no API key or per-repo config): scans every dependency-touching PR for malware, typosquatting, obfuscated/eval'd code and suspicious install scripts — a different risk class than Dependabot, which only answers "is there a newer version." `Socket Security: Project Report` and `Socket Security: Pull Request Alerts` are both required checks in this repo's branch protection (`required_status_checks.contexts` on `main`), so a flagged dependency blocks merge the same way a failing `lint`/`test`/`build` check does. No `socket.yml` is committed here — the App's defaults (`pullRequestAlertsEnabled`, `dependencyOverviewEnabled`) already cover this repo; only add one later if a confirmed false positive needs an explicit ignore.
 
 ---
 
@@ -333,6 +334,8 @@ Use the `/sonar-check` skill to validate code quality metrics:
 ```
 
 **Scoped analysis**: For fix-loop iterations, analyze only changed code (faster feedback)
+
+**Bootstrap gotcha**: `.mcp.json` (which holds `SONARQUBE_PROJECT_KEY`) is gitignored and local-only, so git never catches a stale value. If this repo's `.mcp.json` was copied from another project when setting up SonarQube, verify `SONARQUBE_PROJECT_KEY` matches `sonar.projectKey` in `sonar-project.properties` before trusting any MCP result — tools that don't accept an explicit `projectKey` fall back to the env var silently.
 
 See `/sonar-check` skill for setup and detailed usage.
 
