@@ -22,6 +22,8 @@ This supersedes and absorbs issue #23 (narrower duplicate — same Dockerfile/`e
 
 **Discovery during implementation**: `node:26-alpine` no longer bundles `corepack` (Node dropped it from the default install starting with this line) — the builder stage's `RUN corepack enable && corepack prepare pnpm@latest --activate` failed with `corepack: not found`. Fixed by installing it explicitly first: `npm install -g corepack@latest && corepack enable && ...`. `Dockerfile.dev` was unaffected since it installs pnpm via `get.pnpm.io/install.sh`, not corepack.
 
+**Second discovery (caught by CI, not local testing)**: local verification only ran under the host's Node 22, so it missed a runtime regression that only manifests under real Node 26. Node 26 added a native `localStorage` global (Web Storage API) that exists but resolves to `undefined` unless the process is started with `--localstorage-file`. In vitest's jsdom `environment: 'jsdom'` + `globals: true` setup, `window` is `globalThis` itself (self-referential, like a real browser), so `window.localStorage` resolves through that same broken native getter instead of jsdom's own Storage implementation — breaking every test that touches `localStorage` (`useTheme` and everything that renders `App`). Fixed in `src/test/setup.ts` by pulling a working `Storage` instance from a standalone `new JSDOM(...)` and assigning it directly to `globalThis.localStorage` (the property is `configurable: true`, so this is safe). Verified by running the full suite inside a real `node:26-alpine` container (not just locally on Node 22) — 103/103 pass.
+
 ## Requirements
 
 ### Functional Requirements
