@@ -65,6 +65,52 @@ describe('InputSection', () => {
     expect(onSubmit).toHaveBeenCalledTimes(1);
   });
 
+  it('should call onSubmit when Ctrl+Enter is pressed in the textarea', async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <InputSection
+        value="Test phrase"
+        onChange={() => {}}
+        onSubmit={onSubmit}
+        loading={false}
+        error={null}
+        elapsedTime={null}
+        showCompletion={false}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText(/Escribe una frase/i);
+    input.focus();
+    await user.keyboard('{Control>}{Enter}{/Control}');
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onSubmit when Enter is pressed without a modifier key', async () => {
+    const onSubmit = vi.fn();
+    const user = userEvent.setup();
+
+    render(
+      <InputSection
+        value="Test phrase"
+        onChange={() => {}}
+        onSubmit={onSubmit}
+        loading={false}
+        error={null}
+        elapsedTime={null}
+        showCompletion={false}
+      />,
+    );
+
+    const input = screen.getByPlaceholderText(/Escribe una frase/i);
+    input.focus();
+    await user.keyboard('{Enter}');
+
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
   it('should disable input and button when loading', () => {
     render(
       <InputSection

@@ -44,7 +44,7 @@ jobs:
           sudo mv gitleaks /usr/local/bin/gitleaks
       - name: Run gitleaks
         run: gitleaks detect --redact --no-banner
-      - run: pnpm run test:run
+      - run: pnpm run test:coverage
 
   build:
     runs-on: ubuntu-latest

@@ -25,13 +25,13 @@ if ! pnpm run typecheck; then
 fi
 echo "✅ TypeScript type checking passed"
 
-# Run tests
-echo "🧪 Running tests..."
-if ! pnpm test:run; then
-    echo "❌ Tests failed"
+# Run tests with coverage gate
+echo "🧪 Running tests with coverage..."
+if ! pnpm run test:coverage; then
+    echo "❌ Tests or coverage thresholds failed"
     exit 1
 fi
-echo "✅ Tests passed"
+echo "✅ Tests and coverage passed"
 
 # Run build
 echo "🏗️  Building project..."

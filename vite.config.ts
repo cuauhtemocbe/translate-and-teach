@@ -25,6 +25,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcov', 'html'],
       reportsDirectory: './coverage',
+      all: true,
+      include: ['src/**'],
+      exclude: ['src/main.tsx', 'src/types/**', 'src/vite-env.d.ts', 'src/test/**'],
+      thresholds: {
+        'src/utils/**': { statements: 90, branches: 90, functions: 90, lines: 90 },
+        'src/services/**': { statements: 90, branches: 90, functions: 90, lines: 90 },
+        'src/**': { statements: 80, branches: 80, functions: 80, lines: 80 },
+      },
     },
   },
 })
