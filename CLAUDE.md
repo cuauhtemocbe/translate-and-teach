@@ -143,7 +143,7 @@ Engram will extract and save these items automatically via mem_capture_passive.
 
 ### Quality Standards
 
-- **Test Coverage**: Use `/testing` skill to maintain coverage targets and mutation scores
+- **Test Coverage**: Enforced via `vite.config.ts`'s `coverage.thresholds` — 90% (statements/branches/functions/lines) for `src/utils/**` and `src/services/**`, 80% globally for `src/**`. `pnpm run test:coverage` fails the build if any threshold isn't met; it's wired into `scripts/validate.sh` and CI (`.github/workflows/ci.yml`). Use `/testing` skill for guidance on closing gaps and mutation scores.
 - **Code Quality**: Use `/sonar-check` to validate Quality Gates (complexity, duplication, maintainability)
 - **Security**: Use `/trivy-scan` to detect vulnerabilities, secrets, and misconfigurations
 - **Commit Messages**: Use `/commit-writer` for conventional commits with proper body and co-authoring
@@ -170,51 +170,33 @@ Engram will extract and save these items automatically via mem_capture_passive.
 
 ---
 
-## Architecture and Design Rules (Project-Specific Example)
+## Architecture
 
-**Note**: This section is project-specific. Adapt it to your architecture and tech stack.
+translate-and-teach ("English Pro") is a client-side React SPA — no backend server, just a static build that calls Together.ai's API directly from the browser.
 
-### Example: Pragmatic Hexagonal Architecture
+- **`src/main.tsx`**: entry point, mounts `App` into `#app` (loaded by `index.html`). `src/main.ts` (a leftover "Hello World" boilerplate file, unrelated to the app) was deleted — `main.tsx` is the only entry point.
+- **`src/App.tsx`**: top-level component, owns translation request state and wires input → API call → results.
+- **`src/components/`**: presentational React components (`Header`, `Hero`, `Features`, `InputSection`, `ResultCard`, `ResultsGrid`, `ThemeToggle`, `TranslationTimer`), each with a co-located `.css` file and `.test.tsx`.
+- **`src/hooks/`**: custom React hooks — currently `useTheme` (dark/light mode with persisted preference).
+- **`src/services/`**: external API integration — `togetherApi.ts` wraps the Together.ai chat completions call, model configurable via `VITE_TOGETHER_MODEL`.
+- **`src/utils/`**: pure logic with no React/DOM dependency — `parseResponse.ts` parses the LLM's four-section Markdown response into structured data.
+- **`src/types/`**: shared TypeScript interfaces (`TranslationRequest`, `TranslationResponse`, etc.) — no runtime code.
+- **`src/styles/`**: global CSS variables and theme tokens shared across components.
 
-**Layering:** Strict separation between:
-- **Presentation** (`api/`): HTTP handlers, controllers, DTOs
-- **Business Logic** (`domain/`, `services/`): Core domain models, use cases
-- **Infrastructure** (`infrastructure/`): Database, external APIs, adapters
-
-**Structural Typing (Go style):** 
-- Use `interface` in domain to define contracts
-- Avoid complex inheritance or `abstract class`
-- Leverage TypeScript's structural Duck Typing
-
-**KISS Principle:** Flat, easy-to-read and test code. Prefer pure functions over classes when possible.
-
-**Configuration Example:**
-```ts
-// config.ts
-import { z } from "zod";
-
-const ConfigSchema = z.object({
-  DATABASE_URL: z.string().url(),
-  PORT: z.coerce.number().default(3000),
-});
-
-export const config = ConfigSchema.parse(process.env); // implicit singleton
-```
+**Testing**: co-located `*.test.ts(x)` next to the source file, Vitest + Testing Library (`jsdom` environment). See Quality Standards above for the enforced coverage thresholds.
 
 ---
 
-## Adapting This Template
+## Validation: Hosted CI + Local Hooks
 
-This `CLAUDE.example.md` is a starting point. To use it in your project:
+This repo has **two** validation layers — neither is a substitute for the other:
 
-1. **Copy to `CLAUDE.md`** in your project root (or `.claude/CLAUDE.md`)
-2. **Customize Architecture section** with your specific rules (layering, patterns, conventions)
-3. **Adjust Quality Gates** (coverage targets, mutation scores, SonarQube thresholds)
-4. **Configure Issue Tracker** (GitHub vs GitLab, labels, project board links)
-5. **Add Project Context** (domain knowledge, key constraints, team conventions)
-6. **Remove what you don't use** (if you don't use SonarQube, remove that section)
+1. **Hosted CI** (`.github/workflows/ci.yml`): runs on every push and PR to `main` — three jobs: `lint` (Biome), `test` (gitleaks secret scan against full history + `pnpm run test:coverage`), and `build`. This is the actual enforced gate on GitHub — branch protection on `main` also requires the `Socket Security` checks (see Security Hardening below) to pass before merge.
+2. **Local husky hooks** (`.husky/`): fast feedback *before* code reaches CI.
+   - `pre-commit`: `gitleaks protect --staged` — scans only the staged diff, every commit.
+   - `pre-merge-commit` / `pre-push`: on `main`/`develop`, runs the full `scripts/validate.sh` (lint → typecheck → `test:coverage` → build → `pnpm audit`); on feature branches, a lighter typecheck-only check.
 
-The skills (`/spec-driven-dev`, `/user-stories`, `/testing`, etc.) are universal and work across projects. The CLAUDE.md file is where you add project-specific context.
+**Key commands**: `pnpm run validate` (full local gate, same steps as protected-branch `pre-push`), `pnpm test` / `pnpm run test:coverage`, `pnpm run build`, `pnpm run lint`, `pnpm run typecheck`.
 
 ---
 
@@ -299,9 +281,9 @@ See `/trivy-scan` skill for detailed usage and examples.
 Concrete measures in place beyond the `/trivy-scan` skill (tracked under the "Security Hardening" GitHub milestone):
 
 - **Dependabot** (`.github/dependabot.yml`): weekly updates for the `npm`, `docker`, and `github-actions` ecosystems, so dependency and base-image bumps don't rely on someone remembering to check manually. Each ecosystem groups `minor`/`patch` bumps into a single `minor-and-patch` PR per cycle to cut down on churn; `major` bumps are intentionally left ungrouped so they surface individually for review (this repo is on the never-auto-merge list for majors, per meta-projects policy).
-- **Socket Firewall on Dependabot PRs** (`.github/workflows/dependabot-socket-firewall.yml`): this repo has no general hosted CI gate for human PRs (local `scripts/validate.sh` + husky hooks cover that case) — but Dependabot PRs are bot-authored and never hand-reviewed line by line, which is a different risk profile. This workflow triggers only for `dependabot[bot]`, reinstalls the PR's dependencies through Socket Firewall Free (`sfw pnpm install`), and auto-closes the PR with an explanatory comment if `sfw` blocks a known-malicious package. Requires `permissions: pull-requests: write` explicitly, since Dependabot-triggered workflows get a read-only token by default. Third-party actions (`actions/checkout`, `SocketDev/action`) are pinned by commit SHA, not a floating tag.
+- **Socket Firewall on Dependabot PRs** (`.github/workflows/dependabot-socket-firewall.yml`): `ci.yml`'s `lint`/`test`/`build` jobs cover human PRs, but Dependabot PRs are bot-authored and never hand-reviewed line by line, which is a different risk profile. This workflow triggers only for `dependabot[bot]`, reinstalls the PR's dependencies through Socket Firewall Free (`sfw pnpm install`), and auto-closes the PR with an explanatory comment if `sfw` blocks a known-malicious package. Requires `permissions: pull-requests: write` explicitly, since Dependabot-triggered workflows get a read-only token by default. Third-party actions (`actions/checkout`, `SocketDev/action`) are pinned by commit SHA, not a floating tag.
 - **Production Docker image pinned by digest**: `Dockerfile`'s `builder` and `production` stages pin `node:22-alpine` with `@sha256:...` for byte-for-byte reproducible builds. `Dockerfile.dev` intentionally stays on the floating tag — dev benefits more from automatic security patches on rebuild than from exact reproducibility. This asymmetry is deliberate, not an oversight.
-- **Pre-commit secret scanning** (`.husky/pre-commit`): `gitleaks` scans the staged diff before every commit, so a leaked `VITE_TOGETHER_API_KEY` (or similar) is caught locally before it ever reaches git history — this repo has no hosted CI as a second line of defense for human-authored commits.
+- **Pre-commit secret scanning** (`.husky/pre-commit`): `gitleaks` scans the staged diff before every commit, so a leaked `VITE_TOGETHER_API_KEY` (or similar) is caught locally before it ever reaches git history — a first line of defense ahead of `ci.yml`'s full-history `gitleaks detect` in the `test` job.
 - **Socket Security GitHub App** (`github.com/apps/socket-security`, installed fleet-wide via "All repositories", no API key or per-repo config): scans every dependency-touching PR for malware, typosquatting, obfuscated/eval'd code and suspicious install scripts — a different risk class than Dependabot, which only answers "is there a newer version." `Socket Security: Project Report` and `Socket Security: Pull Request Alerts` are both required checks in this repo's branch protection (`required_status_checks.contexts` on `main`), so a flagged dependency blocks merge the same way a failing `lint`/`test`/`build` check does. No `socket.yml` is committed here — the App's defaults (`pullRequestAlertsEnabled`, `dependencyOverviewEnabled`) already cover this repo; only add one later if a confirmed false positive needs an explicit ignore.
 
 ---
