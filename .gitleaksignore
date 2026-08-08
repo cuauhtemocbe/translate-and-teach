@@ -1,0 +1,14 @@
+# False positives confirmed during issue #25 (CI gitleaks enablement).
+# Each entry is a hardcoded test fixture, a doc/script reference to an env
+# var *name* (not a value), or the Sonar project key — none are real secrets.
+# Format: <commit>:<file>:<rule-id>:<start-line>
+16c8b8707b0e094393e4e570bdb71159d49e4893:src/test/setup.ts:generic-api-key:13
+9dd33b4d3adc350bf37ff92604bcb4edca68f315:scripts/build-with-secrets.sh:generic-api-key:14
+9dd33b4d3adc350bf37ff92604bcb4edca68f315:specs/production-environment-config-plan.md:generic-api-key:341
+9dd33b4d3adc350bf37ff92604bcb4edca68f315:scripts/test-docker-build.sh:generic-api-key:34
+9ad71a07edad8cc43da3b1bcbddc969c3b30f00f:src/test/setup.ts:generic-api-key:13
+9dd33b4d3adc350bf37ff92604bcb4edca68f315:specs/production-environment-config.md:generic-api-key:209
+a8a014c3af7b04495adee22ce42bac04e15f7a68:sonar-project.properties:generic-api-key:1
+9dd33b4d3adc350bf37ff92604bcb4edca68f315:docs/security-audit.md:generic-api-key:46
+9dd33b4d3adc350bf37ff92604bcb4edca68f315:docs/security-audit.md:generic-api-key:194
+9dd33b4d3adc350bf37ff92604bcb4edca68f315:docs/security-audit.md:generic-api-key:242
