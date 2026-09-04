@@ -105,10 +105,4 @@
   --transition-fast: 150ms ease-in-out;
   --transition-normal: 300ms ease-in-out;
   --transition-slow: 500ms ease-in-out;
-
-  /* Breakpoints (for reference in media queries) */
-  /* --breakpoint-sm: 640px; */
-  /* --breakpoint-md: 768px; */
-  /* --breakpoint-lg: 1024px; */
-  /* --breakpoint-xl: 1280px; */
 }

@@ -6,7 +6,7 @@ import './ResultCard.css';
  * ResultCard component
  * Displays a single section of the translation result with markdown rendering
  */
-export function ResultCard({ title, content, icon, variant }: ResultCardProps) {
+export function ResultCard({ title, content, icon, variant }: Readonly<ResultCardProps>) {
   return (
     <section className={`result-card result-card--${variant} fade-in`} aria-label={title}>
       <div className="result-card-header">

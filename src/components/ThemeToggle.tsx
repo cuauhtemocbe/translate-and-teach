@@ -2,8 +2,8 @@ import type { Theme } from '../hooks/useTheme';
 import './ThemeToggle.css';
 
 interface ThemeToggleProps {
-  theme: Theme;
-  onToggle: () => void;
+  readonly theme: Theme;
+  readonly onToggle: () => void;
 }
 
 /**

@@ -16,7 +16,7 @@ export function useTheme() {
 
   useEffect(() => {
     // Apply theme to document
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.dataset.theme = theme;
 
     // Persist to localStorage
     localStorage.setItem('theme', theme);

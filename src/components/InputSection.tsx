@@ -1,13 +1,50 @@
 import './InputSection.css';
 
 interface InputSectionProps {
-  value: string;
-  onChange: (value: string) => void;
-  onSubmit: () => void;
-  loading: boolean;
-  error: string | null;
-  elapsedTime: number | null;
-  showCompletion: boolean;
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+  readonly onSubmit: () => void;
+  readonly loading: boolean;
+  readonly error: string | null;
+  readonly elapsedTime: number | null;
+  readonly showCompletion: boolean;
+}
+
+function renderSubmitButtonContent(
+  loading: boolean,
+  elapsedTime: number | null,
+  showCompletion: boolean,
+) {
+  if (loading && elapsedTime != null) {
+    const seconds = `${elapsedTime.toFixed(1)}s`;
+    return (
+      <>
+        <span className="spinner" aria-hidden="true"></span> Traduciendo... {seconds}
+      </>
+    );
+  }
+
+  if (loading) {
+    return (
+      <>
+        <span className="spinner" aria-hidden="true"></span> Traduciendo...
+      </>
+    );
+  }
+
+  if (showCompletion && elapsedTime != null) {
+    return (
+      <>
+        <span aria-hidden="true">✓</span> Completado en {elapsedTime.toFixed(1)}s
+      </>
+    );
+  }
+
+  return (
+    <>
+      <span aria-hidden="true">🔍</span> Generar traducción
+    </>
+  );
 }
 
 /**
@@ -22,7 +59,7 @@ export function InputSection({
   error,
   elapsedTime,
   showCompletion,
-}: InputSectionProps) {
+}: Readonly<InputSectionProps>) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Submit on Ctrl+Enter or Cmd+Enter
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
@@ -65,27 +102,7 @@ export function InputSection({
           disabled={loading || !value.trim()}
           aria-busy={loading}
         >
-          {loading && elapsedTime != null ? (
-            <>
-              <span className="spinner" aria-hidden="true"></span>
-              Traduciendo... {elapsedTime.toFixed(1)}s
-            </>
-          ) : loading ? (
-            <>
-              <span className="spinner" aria-hidden="true"></span>
-              Traduciendo...
-            </>
-          ) : showCompletion && elapsedTime != null ? (
-            <>
-              <span aria-hidden="true">✓</span>
-              Completado en {elapsedTime.toFixed(1)}s
-            </>
-          ) : (
-            <>
-              <span aria-hidden="true">🔍</span>
-              Generar traducción
-            </>
-          )}
+          {renderSubmitButtonContent(loading, elapsedTime, showCompletion)}
         </button>
       </div>
     </section>

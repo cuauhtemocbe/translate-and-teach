@@ -9,8 +9,7 @@ export function Header() {
     <header className="header">
       <div className="header-container">
         <h1 className="header-title">
-          <span className="header-icon">🌐</span>
-          English Pro
+          <span className="header-icon">🌐</span> English Pro
         </h1>
         <p className="header-tagline">Spanish Phrase Analyzer</p>
       </div>

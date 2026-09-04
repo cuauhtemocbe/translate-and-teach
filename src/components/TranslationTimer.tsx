@@ -7,9 +7,9 @@ import './TranslationTimer.css';
 
 export interface TranslationTimerProps {
   /** Whether translation is currently in progress */
-  isLoading: boolean;
+  readonly isLoading: boolean;
   /** Elapsed time in seconds (null if no translation has been made) */
-  elapsedTime: number | null;
+  readonly elapsedTime: number | null;
 }
 
 /**

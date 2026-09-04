@@ -45,10 +45,10 @@ export type CardVariant = 'translation' | 'grammar' | 'tips' | 'variations';
  * Props for ResultCard component
  */
 export interface ResultCardProps {
-  title: string;
-  content: string;
-  icon: string;
-  variant: CardVariant;
+  readonly title: string;
+  readonly content: string;
+  readonly icon: string;
+  readonly variant: CardVariant;
 }
 
 /**
@@ -58,8 +58,3 @@ export interface ErrorState {
   message: string;
   code?: string;
 }
-
-/**
- * Loading state
- */
-export type LoadingState = boolean;

@@ -3,7 +3,7 @@ import { ResultCard } from './ResultCard';
 import './ResultsGrid.css';
 
 interface ResultsGridProps {
-  results: TranslationResponse;
+  readonly results: TranslationResponse;
 }
 
 /**
