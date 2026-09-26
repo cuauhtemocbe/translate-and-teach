@@ -6,14 +6,10 @@ name: Container security
 
 on:
   pull_request:
+    # No `paths:` filter: trivy-image and trivy-config are required checks in
+    # branch protection, and a path-filtered required check never reports on
+    # PRs that don't touch those files, leaving the merge blocked.
     branches: [main]
-    paths:
-      - Dockerfile
-      - .dockerignore
-      - package.json
-      - pnpm-lock.yaml
-      - .trivyignore.yaml
-      - .github/workflows/container-security.yml
   push:
     branches: [main]
   schedule:
