@@ -1,5 +1,5 @@
 # ---------- Builder ----------
-FROM node:26-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS builder
+FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS builder
 
 # Railway injects environment variables at build time
 # Declare them with ARG to make them available in the build
@@ -28,7 +28,7 @@ ENV VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL
 RUN pnpm run typecheck && pnpm run build
 
 # ---------- Production ----------
-FROM node:26-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS production
+FROM node:26-alpine@sha256:0b36e8c136b94cd4fcf02188228e76c31ad5872eef3fec8cbd2eee500cfd9e80 AS production
 
 RUN apk add --no-cache curl
 ENV NODE_ENV=production
