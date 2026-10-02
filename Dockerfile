@@ -35,7 +35,11 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # Install serve globally BEFORE switching users
-RUN npm install -g serve
+# npm is only needed for this install; drop it so its bundled deps
+# (brace-expansion, undici, ...) don't ship in the production image.
+RUN npm install -g serve \
+    && npm cache clean --force \
+    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 # Create user without privileges
 RUN adduser -D -u 10001 nodeuser
