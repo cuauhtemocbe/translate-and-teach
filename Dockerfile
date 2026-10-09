@@ -34,10 +34,16 @@ RUN apk add --no-cache curl
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Install serve globally BEFORE switching users
+# Install serve BEFORE switching users, from a pinned manifest + lockfile.
+# serve@14.2.6 pins compression 1.8.1 (CVE-2026-87776, fixed in 1.8.2) and no
+# serve release depends on the fix yet, so docker/serve/package.json overrides it.
+# Drop the override once serve ships with compression >= 1.8.2.
 # npm is only needed for this install; drop it so its bundled deps
 # (brace-expansion, undici, ...) don't ship in the production image.
-RUN npm install -g serve \
+WORKDIR /opt/serve
+COPY docker/serve/package.json docker/serve/package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts \
+    && ln -s /opt/serve/node_modules/.bin/serve /usr/local/bin/serve \
     && npm cache clean --force \
     && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
