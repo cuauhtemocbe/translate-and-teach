@@ -1,0 +1,12 @@
+{
+  "name": "translate-and-teach-serve",
+  "version": "1.0.0",
+  "description": "Static file server installed in the production image (see Dockerfile)",
+  "private": true,
+  "dependencies": {
+    "serve": "14.2.6"
+  },
+  "overrides": {
+    "compression": "1.8.2"
+  }
+}
