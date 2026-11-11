@@ -30,7 +30,7 @@ AI-powered Spanish to English translation with grammatical analysis, learning ti
 
 ### Prerequisites
 
-- **Node.js** >= 22.0.0
+- **Node.js** >= 26.12.1, < 27 (matches `engines.node` in `package.json`)
 - **pnpm** >= 9.0.0
 - **Together.ai API Key** ([Get one here](https://api.together.xyz/settings/api-keys))
 - **[gitleaks](https://github.com/gitleaks/gitleaks#installing)** — required by the pre-commit hook, which scans staged changes for secrets before every commit (`brew install gitleaks`, or download a binary from the [releases page](https://github.com/gitleaks/gitleaks/releases))
@@ -264,7 +264,7 @@ docker run -p 8080:8080 translate-and-teach:local
 
 Visit `http://localhost:8080` to test the app.
 
-**Base image pinning**: `Dockerfile`'s `builder` and `production` stages pin `node:22-alpine` by digest (`@sha256:...`) for byte-for-byte reproducible production builds. `Dockerfile.dev` deliberately stays on the floating tag, since local development benefits more from automatic security patches on rebuild than from exact reproducibility. Dependabot (`docker` ecosystem, `.github/dependabot.yml`) keeps the pinned digest current.
+**Base image pinning**: every `FROM node:` line in `Dockerfile` (the `builder` and `production` stages) and in `Dockerfile.dev` uses the same pinned string, `node:<version>-alpine3.24@sha256:<digest>`, so development and production run the same Node build and builds are byte-for-byte reproducible. Change the string in all of those lines at once, never in only one. To refresh it, run `docker pull node:<new-version>-alpine3.24`, then `docker inspect --format='{{index .RepoDigests 0}}' node:<new-version>-alpine3.24` to read the digest, and replace the whole string. Dependabot (`docker` ecosystem, `.github/dependabot.yml`) opens bump PRs for these pins; check that its PR changed every `FROM node:` line, `Dockerfile.dev` included, and fix the rest by hand if not.
 
 ---
 
