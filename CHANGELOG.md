@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hosted CI (`.github/workflows/ci.yml`): `lint`, `test`, and `build` jobs on every push/PR to `main`
 
 ### Changed
-- Production Docker base image pinned by digest (`node:22-alpine@sha256:...`) for reproducible builds
+- Node base image pinned by tag and digest (`node:<version>-alpine3.24@sha256:...`), the same string in every `FROM node:` line of `Dockerfile` and `Dockerfile.dev`, for reproducible builds and matching dev/prod runtimes
 - `CLAUDE.md` rewritten to document the project's real architecture and validation layers, replacing the generic template it was bootstrapped from
 
 ### Fixed

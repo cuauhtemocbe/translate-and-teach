@@ -8,10 +8,18 @@ function fromLines(dockerfile: string): string[] {
     .filter((line) => line.trim().toUpperCase().startsWith('FROM '))
 }
 
-describe('Reproducible production image builds', () => {
+function readDockerfile(name: string): string {
+  return readFileSync(resolve(__dirname, '../../', name), 'utf-8')
+}
+
+// "FROM node:<tag>@sha256:<digest> AS builder" -> "node:<tag>@sha256:<digest>"
+function nodeImage(fromLine: string): string {
+  return fromLine.trim().split(/\s+/)[1]
+}
+
+describe('Reproducible image builds', () => {
   it('pins the builder and production stage FROM lines by digest', () => {
-    const dockerfile = readFileSync(resolve(__dirname, '../../Dockerfile'), 'utf-8')
-    const lines = fromLines(dockerfile)
+    const lines = fromLines(readDockerfile('Dockerfile'))
 
     expect(lines).toHaveLength(2)
     for (const line of lines) {
@@ -19,14 +27,27 @@ describe('Reproducible production image builds', () => {
     }
   })
 
-  it('leaves Dockerfile.dev on a floating tag', () => {
-    const dockerfileDev = readFileSync(resolve(__dirname, '../../Dockerfile.dev'), 'utf-8')
-    const lines = fromLines(dockerfileDev)
+  it('pins Dockerfile.dev by digest too', () => {
+    const lines = fromLines(readDockerfile('Dockerfile.dev'))
 
     expect(lines.length).toBeGreaterThan(0)
     for (const line of lines) {
-      expect(line).not.toMatch(/@sha256:/)
+      expect(line).toMatch(/@sha256:[0-9a-f]{64}/)
     }
+  })
+
+  it('uses one identical node image string in every FROM line of both Dockerfiles', () => {
+    const lines = [
+      ...fromLines(readDockerfile('Dockerfile')),
+      ...fromLines(readDockerfile('Dockerfile.dev')),
+    ]
+    const images = new Set(lines.map(nodeImage))
+
+    expect(lines).toHaveLength(3)
+    expect(images.size).toBe(1)
+    expect([...images][0]).toMatch(
+      /^node:\d+\.\d+\.\d+-alpine\d+\.\d+@sha256:[0-9a-f]{64}$/,
+    )
   })
 
   // "Dependabot keeps the pinned digest current" is verified structurally by the dependabot.yml
