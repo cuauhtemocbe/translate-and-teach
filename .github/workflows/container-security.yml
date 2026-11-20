@@ -24,14 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # Same placeholder build args as ci.yml's docker-build (Vite inlines them
-      # at build time, so never use a real key here). Never pushed.
+      # No build args, same as ci.yml's docker-build: the image takes no credential
+      # at build time (the server reads it at runtime). Never pushed.
       - name: Build production image
-        run: |
-          docker build \
-            --build-arg VITE_TOGETHER_API_KEY=ci-placeholder \
-            --build-arg VITE_TOGETHER_MODEL=ci-placeholder \
-            -t translate-and-teach:scan .
+        run: docker build -t translate-and-teach:scan .
       - name: Trivy image scan
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:

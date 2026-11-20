@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process'
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -103,8 +103,24 @@ describe('No build-time credential in the image or CI', () => {
     expect(dockerfile).not.toMatch(/\bserve\b.*-s\b/)
   })
 
-  it('does not pass the API key to the image build in CI', () => {
-    expect(ci).not.toMatch(/TOGETHER_API_KEY=ci-placeholder/)
+  it('passes the API key to no image build in any workflow', () => {
+    const workflowsDir = join(ROOT, '.github/workflows')
+    const offending: string[] = []
+
+    for (const file of readdirSync(workflowsDir).filter((name) => name.endsWith('.yml'))) {
+      for (const line of readFileSync(join(workflowsDir, file), 'utf-8').split('\n')) {
+        // Only an `env:` sentinel mapping (ci.yml's build and scan steps) or a comment may name it:
+        // a --build-arg or build-args entry would put the key in the image build
+        const isEnvSentinel = /^\s+(VITE_)?TOGETHER_API_KEY:\s+\S+/.test(line)
+        const isComment = line.trim().startsWith('#')
+
+        if (/TOGETHER_API_KEY/.test(line) && !isEnvSentinel && !isComment) {
+          offending.push(`${file}: ${line.trim()}`)
+        }
+      }
+    }
+
+    expect(offending).toEqual([])
   })
 
   it('runs the dist scan in CI after building with sentinel values set', () => {
