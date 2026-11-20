@@ -10,7 +10,6 @@ yarn-error.log*
 
 # Package Manager Lock Files (keep pnpm-lock.yaml versioned)
 package-lock.json
-!docker/serve/package-lock.json
 yarn.lock
 
 # Build

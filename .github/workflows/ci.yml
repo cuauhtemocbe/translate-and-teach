@@ -56,7 +56,16 @@ jobs:
           node-version: 26
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Sentinel credentials, also under the old VITE_ name: if any source ever inlines
+      # one into dist/, the scan below fails the build
       - run: pnpm run build
+        env:
+          TOGETHER_API_KEY: ci-sentinel-3b7e91d4-not-a-real-key
+          VITE_TOGETHER_API_KEY: ci-sentinel-3b7e91d4-not-a-real-key
+      - run: pnpm run scan:dist
+        env:
+          TOGETHER_API_KEY: ci-sentinel-3b7e91d4-not-a-real-key
+          VITE_TOGETHER_API_KEY: ci-sentinel-3b7e91d4-not-a-real-key
 
   docker-build:
     runs-on: ubuntu-latest
@@ -69,6 +78,3 @@ jobs:
           context: .
           file: Dockerfile
           push: false
-          build-args: |
-            VITE_TOGETHER_API_KEY=ci-placeholder
-            VITE_TOGETHER_MODEL=ci-placeholder

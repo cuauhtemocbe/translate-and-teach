@@ -6,7 +6,7 @@
 		"useIgnoreFile": true
 	},
 	"files": {
-		"includes": ["src/**", "!**/dist"]
+		"includes": ["src/**", "server/**", "!**/dist"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -36,7 +36,7 @@
 	},
 	"overrides": [
 		{
-			"includes": ["src/**/*.test.ts", "src/**/*.test.tsx"],
+			"includes": ["src/**/*.test.ts", "src/**/*.test.tsx", "server/**/*.test.ts"],
 			"linter": {
 				"rules": {
 					"suspicious": {

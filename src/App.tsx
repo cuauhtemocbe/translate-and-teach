@@ -5,7 +5,7 @@ import { InputSection } from './components/InputSection';
 import { ResultsGrid } from './components/ResultsGrid';
 import { ThemeToggle } from './components/ThemeToggle';
 import { useTheme } from './hooks/useTheme';
-import { translatePhrase } from './services/togetherApi';
+import { translatePhrase } from './services/translateApi';
 import type { TranslationResponse } from './types';
 import { parseResponse } from './utils/parseResponse';
 import './styles/globals.css';

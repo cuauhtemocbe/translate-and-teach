@@ -2,247 +2,109 @@
 
 This guide covers deploying English Pro to production.
 
+The app is a static front end **plus a small Node server** (`server/`) that serves it and proxies `POST /api/translate` to Together.ai. The Together.ai credential lives only on that server, as a runtime variable. Any platform that runs the Docker image works; static-only hosts (Vercel, Netlify static hosting) do not, because `/api/translate` would not exist.
+
 ---
 
 ## ⚠️ Before Deploying
 
-### 1. Set Up Together.ai API Key
-
-You need a Together.ai API key to make the app functional.
+### 1. Get a Together.ai API Key and Pick a Model
 
 1. Sign up at [Together.ai](https://api.together.xyz/)
 2. Get your API key from [Settings → API Keys](https://api.together.xyz/settings/api-keys)
-3. Keep it secure - never commit it to git!
+3. Pick a **serverless** model (one that answers without a dedicated endpoint), e.g. `Qwen/Qwen3.8-Flash`
+4. Keep the key secure: never commit it, never give it a `VITE_` prefix, never pass it as a Docker build arg
+
+> **Rotate the key if this app ran before the server was added.** Earlier builds inlined `VITE_TOGETHER_API_KEY` into `dist/`, so that key was visible to every visitor. Create a new one and do not reuse the old variable name.
 
 ### 2. Test Locally
 
 ```bash
-# Add required environment variables to .env
-echo "VITE_TOGETHER_API_KEY=your_actual_key_here" > .env
-echo "VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo" >> .env
-
-# Test the app
-pnpm dev
+# Runtime variables read by the server (not VITE_*)
+cat > .env <<'EOF'
+TOGETHER_API_KEY=your_actual_key_here
+TOGETHER_MODEL=Qwen/Qwen3.8-Flash
+# Optional: model name shown in the footer
+VITE_TOGETHER_MODEL=Qwen/Qwen3.8-Flash
+EOF
 
 # Verify all tests pass
 pnpm test:run
 
-# Build for production
+# Run the API (http://localhost:8080) and the front end (http://localhost:5173)
+pnpm dev:server   # in one terminal
+pnpm dev          # in another; Vite proxies /api to the API
+```
+
+To try the production setup (the server serves the built site itself):
+
+```bash
 pnpm build
-
-# Preview production build
-pnpm preview
+pnpm start:server   # http://localhost:8080
 ```
 
 ---
 
-## 🌐 Option 1: Deploy to Vercel (Recommended)
+## 🐳 Deploy with Docker
 
-### Why Vercel?
-- Zero-config deployment
-- Automatic HTTPS
-- Global CDN
-- Environment variable management
-- GitHub integration
-
-### Steps
-
-#### A. Using Vercel CLI
+### Build and Run
 
 ```bash
-# Install Vercel CLI
-pnpm add -g vercel
-
-# Login
-vercel login
-
-# Deploy
-vercel
-
-# Follow prompts:
-# - Link to existing project or create new
-# - Configure project settings
-# - Add environment variables:
-#   VITE_TOGETHER_API_KEY
-#   VITE_TOGETHER_MODEL
-
-# Deploy to production
-vercel --prod
-```
-
-#### B. Using Vercel Dashboard
-
-1. Go to [vercel.com](https://vercel.com)
-2. Click "New Project"
-3. Import your GitHub repository
-4. Configure:
-   - **Framework Preset**: Vite
-   - **Build Command**: `pnpm build`
-   - **Output Directory**: `dist`
-   - **Install Command**: `pnpm install`
-5. Add Environment Variables:
-   - **Key**: `VITE_TOGETHER_API_KEY`, **Value**: Your Together.ai API key
-   - **Key**: `VITE_TOGETHER_MODEL`, **Value**: `meta-llama/Llama-3.3-70B-Instruct-Turbo`
-6. Click "Deploy"
-
-### Vercel Configuration
-
-The `vercel.json` file is pre-configured with:
-- SPA routing (all routes → index.html)
-- Security headers (XSS protection, frame options)
-- Asset caching (1 year for immutable assets)
-
----
-
-## 📦 Option 2: Deploy to Netlify
-
-### Why Netlify?
-- Easy deployment
-- Form handling
-- Serverless functions
-- Continuous deployment
-
-### Steps
-
-#### A. Using Netlify CLI
-
-```bash
-# Install Netlify CLI
-pnpm add -g netlify-cli
-
-# Login
-netlify login
-
-# Initialize
-netlify init
-
-# Configure:
-# - Build command: pnpm build
-# - Publish directory: dist
-
-# Add environment variables
-netlify env:set VITE_TOGETHER_API_KEY "your_key_here"
-netlify env:set VITE_TOGETHER_MODEL "meta-llama/Llama-3.3-70B-Instruct-Turbo"
-
-# Deploy
-netlify deploy --prod
-```
-
-#### B. Using Netlify Dashboard
-
-1. Go to [netlify.com](https://netlify.com)
-2. Click "Add new site" → "Import an existing project"
-3. Connect to GitHub
-4. Configure:
-   - **Build command**: `pnpm build`
-   - **Publish directory**: `dist`
-   - **Environment variables**:
-     - `VITE_TOGETHER_API_KEY`: Your Together.ai API key
-     - `VITE_TOGETHER_MODEL`: `meta-llama/Llama-3.3-70B-Instruct-Turbo`
-5. Click "Deploy"
-
-### Netlify Configuration
-
-The `netlify.toml` file is pre-configured with:
-- Build settings
-- SPA redirects
-- Security headers
-- Asset caching
-
----
-
-## 🐳 Option 3: Deploy with Docker
-
-### Build Docker Image
-
-```bash
-# Build production image
+# Build the production image. No credential is needed, or accepted, at build time
 docker build -t english-pro:latest .
 
-# Run locally
+# Run it with runtime variables
 docker run -p 8080:8080 \
-  -e VITE_TOGETHER_API_KEY=your_key_here \
-  -e VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo \
+  -e TOGETHER_API_KEY=your_key_here \
+  -e TOGETHER_MODEL=Qwen/Qwen3.8-Flash \
   english-pro:latest
 
 # Open http://localhost:8080
 ```
 
-### Deploy to Cloud Platforms
+| Variable | Where | Purpose |
+|----------|-------|---------|
+| `TOGETHER_API_KEY` | runtime | Together.ai credential (secret) |
+| `TOGETHER_MODEL` | runtime | Model that answers |
+| `PORT` | runtime | Listening port (default `8080`) |
+| `VITE_TOGETHER_MODEL` | build arg | Model name shown in the footer only |
+
+If `TOGETHER_API_KEY` or `TOGETHER_MODEL` is missing, the site still loads and translations answer `502`; the reason is written to the container logs.
+
+### Railway (Recommended)
+
+1. Create a service from this repository (it uses the `Dockerfile`)
+2. Set the service variables:
+   - `TOGETHER_API_KEY`: your key, marked **sealed** (variable menu → **Seal Variable**)
+   - `TOGETHER_MODEL`: the serverless model
+   - `VITE_TOGETHER_MODEL`: the same model name, for the footer
+3. Deploy. Changing `TOGETHER_API_KEY` or `TOGETHER_MODEL` later only needs a redeploy; changing `VITE_TOGETHER_MODEL` needs a rebuild
+4. Verify with a real phrase (see the checklist below)
+
+### Other Container Platforms
 
 **Google Cloud Run:**
 ```bash
 gcloud run deploy english-pro \
   --image english-pro:latest \
   --platform managed \
-  --set-env-vars VITE_TOGETHER_API_KEY=your_key,VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
+  --set-env-vars TOGETHER_MODEL=Qwen/Qwen3.8-Flash \
+  --set-secrets TOGETHER_API_KEY=together-api-key:latest
 ```
 
-**AWS ECS, Azure Container Instances, etc.:**
-Follow platform-specific container deployment guides.
+**AWS ECS, Azure Container Instances, Fly.io, etc.:**
+Follow platform-specific container deployment guides, setting `TOGETHER_API_KEY` and `TOGETHER_MODEL` as runtime environment variables (use the platform's secret store for the key).
 
 ---
 
-## 🔒 API Key Security (Important!)
+## 🔒 API Key Security
 
-### ⚠️ Current Setup (Development)
-
-The API key is currently included in the frontend bundle via `VITE_` prefix. This is:
-- ✅ OK for development and testing
-- ⚠️ **NOT RECOMMENDED for production** (key visible in browser)
-
-### ✅ Production-Ready Solution: API Proxy
-
-For production, create a backend proxy to hide the API key:
-
-#### Option A: Vercel Serverless Function
-
-Create `api/translate.ts`:
-
-```typescript
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { spanishPhrase } = req.body;
-
-  if (!spanishPhrase) {
-    return res.status(400).json({ error: 'Spanish phrase required' });
-  }
-
-  try {
-    const response = await fetch('https://api.together.xyz/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.TOGETHER_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
-        max_tokens: 1024,
-        messages: [
-          { role: 'system', content: '...' },
-          { role: 'user', content: `Spanish phrase: "${spanishPhrase}"` },
-        ],
-      }),
-    });
-
-    const data = await response.json();
-    res.status(200).json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Translation failed' });
-  }
-}
-```
-
-Then update `togetherApi.ts` to call `/api/translate` instead of Together.ai directly.
-
-#### Option B: Netlify Function
-
-Similar to Vercel, create `netlify/functions/translate.ts`.
+- The browser sends one request, to `/api/translate` on the app's own origin, and never contacts `api.together.xyz`
+- The key is read from `TOGETHER_API_KEY` at runtime and never written into `dist/` or any image layer
+- CI builds with sentinel credentials and runs `pnpm run scan:dist`, which fails if a credential or the provider key prefix appears in `dist/`
+- `scripts/test-docker-build.sh` checks the same for a locally built image
+- Provider errors reach the visitor as one generic message; details go to the server log only
+- Each client gets 25 translations per UTC day (in memory, per process, keyed by the `X-Real-IP` header that Railway's edge sets)
 
 ---
 
@@ -259,7 +121,8 @@ After deploying, verify:
 - [ ] Error messages display correctly
 - [ ] Loading states work
 - [ ] No console errors
-- [ ] API key not visible in browser DevTools
+- [ ] DevTools → Network shows requests only to your own origin, never to `api.together.xyz`
+- [ ] The API key is nowhere in the page source or loaded scripts
 
 ### Performance Checks
 
@@ -293,11 +156,19 @@ pnpm clean:install
 pnpm build
 ```
 
-### API Key Not Working
+### "The translation service is unavailable"
 
-- Verify key is set in platform environment variables
-- Check key has no extra spaces
-- Ensure key has correct permissions on Together.ai
+The server answered `502`. Check the service logs for the reason:
+
+- `TOGETHER_API_KEY or TOGETHER_MODEL is not set`: set both as runtime variables and redeploy
+- `Together.ai answered 401` or `403`: the key is wrong or revoked
+- `Together.ai answered 400`: the model is not serverless or does not exist; try another
+- `Together.ai request timed out`: the provider took longer than 60 seconds
+- `Together.ai answered without any answer text`: a reasoning model spent its token budget before answering; try a non-reasoning model
+
+### "Rate limit exceeded" or "Daily limit reached"
+
+The first is the provider asking to wait; the second is the per-client limit of 25 translations per UTC day.
 
 ### App Not Loading
 
@@ -305,61 +176,24 @@ pnpm build
 - Verify build output in `dist/` folder
 - Check deployment logs
 
-### CORS Errors
-
-- This shouldn't happen with direct Together.ai calls
-- If using a proxy, ensure CORS headers are set
-
----
-
-## 📈 Monitoring
-
-### Vercel Analytics
-
-Enable in Vercel dashboard → Settings → Analytics
-
-### Custom Analytics
-
-Add to `index.html`:
-
-```html
-<!-- Google Analytics, Plausible, etc. -->
-```
-
 ---
 
 ## 🔄 Continuous Deployment
 
-### GitHub Actions
-
-Both Vercel and Netlify auto-deploy on git push if connected to GitHub.
-
-### Manual Deployment
-
-```bash
-# Vercel
-vercel --prod
-
-# Netlify
-netlify deploy --prod
-```
+Railway redeploys on every push to the connected branch. CI (`.github/workflows/ci.yml`) must be green first: lint, tests with coverage, build plus the `dist/` credential scan, and the Docker build.
 
 ---
 
 ## 💰 Cost Estimates
 
-### Hosting (Vercel/Netlify)
-- **Free tier**: Perfect for this app
-- **Bandwidth**: Minimal (static files + API calls)
-- **Build minutes**: ~1 min per deploy
+### Hosting
+- A single small container; the server is idle between requests
+- **Build minutes**: ~1-2 min per deploy
 
 ### Together.ai API
-- **Free tier**: Limited requests
-- **Paid**: Pay per token
-- **Estimate**: $0.20 per 1M tokens
-- **This app**: ~500 tokens per translation
-
-**Monthly cost for 1000 translations**: ~$0.10
+- Pay per token; the cost depends on the model you pick
+- **This app**: roughly 500-1000 tokens per translation, capped at 1024 tokens per answer
+- The daily per-client limit (25) bounds how much one visitor can spend
 
 ---
 
@@ -374,4 +208,4 @@ If you encounter issues:
 
 ---
 
-**Ready to deploy?** Choose your platform and follow the steps above!
+**Ready to deploy?** Build the image, set the two runtime variables, and follow the checklist above.

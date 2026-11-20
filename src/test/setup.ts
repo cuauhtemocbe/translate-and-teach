@@ -17,13 +17,3 @@ Object.defineProperty(globalThis, 'localStorage', {
   writable: true,
   configurable: true,
 });
-
-// Mock environment variables for testing
-Object.defineProperty(import.meta, 'env', {
-  value: {
-    ...import.meta.env,
-    VITE_TOGETHER_API_KEY: 'test-api-key-12345',
-  },
-  configurable: true,
-  writable: true,
-});

@@ -2,10 +2,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
-import * as togetherApi from '../services/togetherApi';
+import * as translateApi from '../services/translateApi';
 
 // Mock the API
-vi.mock('../services/togetherApi', () => ({
+vi.mock('../services/translateApi', () => ({
   translatePhrase: vi.fn(),
 }));
 
@@ -68,7 +68,7 @@ Common phrase
 ## Technical Variations
 Hi, Hey`;
 
-    vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(mockResponse);
+    vi.mocked(translateApi.translatePhrase).mockResolvedValueOnce(mockResponse);
 
     const user = userEvent.setup();
     render(<App />);
@@ -91,7 +91,7 @@ Hi, Hey`;
   });
 
   it('should display a readable error message on API failure', async () => {
-    vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
+    vi.mocked(translateApi.translatePhrase).mockRejectedValueOnce(
       new Error('The translation service is unavailable. Try again later.'),
     );
 
@@ -117,7 +117,7 @@ Hi, Hey`;
   });
 
   it('should show loading state during API call', async () => {
-    vi.mocked(togetherApi.translatePhrase).mockImplementation(
+    vi.mocked(translateApi.translatePhrase).mockImplementation(
       () =>
         new Promise((resolve) => setTimeout(() => resolve('## Principal Translation\nTest'), 100)),
     );
@@ -142,7 +142,7 @@ Hi, Hey`;
 
   it('should clear error on new submission', async () => {
     // First submission fails
-    vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(new Error('Network error'));
+    vi.mocked(translateApi.translatePhrase).mockRejectedValueOnce(new Error('Network error'));
 
     const user = userEvent.setup();
     render(<App />);
@@ -158,7 +158,7 @@ Hi, Hey`;
     });
 
     // Second submission succeeds
-    vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(
+    vi.mocked(translateApi.translatePhrase).mockResolvedValueOnce(
       '## Principal Translation\nSuccess',
     );
 
@@ -189,7 +189,7 @@ Hi, Hey`;
 
   describe('Timer functionality', () => {
     it('should show elapsed time on button after successful translation', async () => {
-      vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(
+      vi.mocked(translateApi.translatePhrase).mockResolvedValueOnce(
         '## Principal Translation\nHello',
       );
 
@@ -213,7 +213,7 @@ Hi, Hey`;
     });
 
     it('should show elapsed time on button even when API fails', async () => {
-      vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(new Error('API error'));
+      vi.mocked(translateApi.translatePhrase).mockRejectedValueOnce(new Error('API error'));
 
       const user = userEvent.setup();
       render(<App />);

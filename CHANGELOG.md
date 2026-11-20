@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `server/`: a dependency-free Node server in the production image that serves `dist/` and exposes `POST /api/translate`, so the Together.ai credential stays on the server (runtime `TOGETHER_API_KEY` and `TOGETHER_MODEL`). It rejects empty, whitespace-only and over-500-character phrases with 400, limits each client to 25 requests per UTC day with 429, and answers provider failures with a generic 502
+- CI gate `pnpm run scan:dist`: the `build` job builds with sentinel credentials and fails if one, or the provider key prefix, appears in `dist/`
+- `pnpm dev:server` and a Vite proxy for `/api` for local development
 - Test coverage enforced as a real gate: 90% for `src/utils/**`/`src/services/**`, 80% globally, wired into `scripts/validate.sh` and CI
 - Biome as the project's single linter/formatter, wired into `scripts/validate.sh`
 - Dependabot for `npm`, `docker`, and `github-actions`, with minor/patch bumps grouped per ecosystem
@@ -16,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hosted CI (`.github/workflows/ci.yml`): `lint`, `test`, and `build` jobs on every push/PR to `main`
 
 ### Changed
+- The browser no longer calls Together.ai: it posts to `/api/translate` on its own origin. Provider failures show "The translation service is unavailable. Try again later." instead of raw `API error` text, and replies are streamed so models that require streaming (e.g. `Qwen/Qwen3.8-Flash`) work
+- The footer names the model from `VITE_TOGETHER_MODEL` instead of a hardcoded one, which now only labels the footer
 - Node base image pinned by tag and digest (`node:<version>-alpine3.24@sha256:...`), the same string in every `FROM node:` line of `Dockerfile` and `Dockerfile.dev`, for reproducible builds and matching dev/prod runtimes
 - `CLAUDE.md` rewritten to document the project's real architecture and validation layers, replacing the generic template it was bootstrapped from
 
@@ -23,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI's `test` job now actually invokes `gitleaks detect` instead of installing the binary and never running it
 
 ### Removed
+- `VITE_TOGETHER_API_KEY` and its Docker `ARG`/`ENV`: Vite inlined it into `dist/`, publishing the credential to every visitor. Rotate any key that was ever built this way
+- `serve` and `docker/serve/`: replaced by the app's own server
+- `scripts/build-with-secrets.sh`, unused since the image stopped taking the key at build time
 - `src/main.ts`, dead "Hello World TypeScript" boilerplate left over from the project's original template — the real entry point is `src/main.tsx`
 
 ## [1.0.0] - 2026-05-13

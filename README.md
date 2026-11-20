@@ -11,7 +11,7 @@ AI-powered Spanish to English translation with grammatical analysis, learning ti
 
 ## ✨ Features
 
-- **AI-Powered Translation**: Uses meta-llama/Llama-3.3-70B via Together.ai
+- **AI-Powered Translation**: A serverless Together.ai model (set with `TOGETHER_MODEL`), called from a server so the credential never reaches the browser
 - **4-Section Analysis**:
   - 🌐 Principal Translation (main English translation)
   - 📖 Grammatical Analysis (step-by-step breakdown)
@@ -87,8 +87,8 @@ translate-and-teach/
 │   │   ├── InputSection.tsx
 │   │   ├── ResultCard.tsx
 │   │   └── ResultsGrid.tsx
-│   ├── services/              # API clients
-│   │   └── togetherApi.ts
+│   ├── services/              # Client for /api/translate
+│   │   └── translateApi.ts
 │   ├── utils/                 # Utility functions
 │   │   └── parseResponse.ts
 │   ├── types/                 # TypeScript types
@@ -99,6 +99,14 @@ translate-and-teach/
 │   ├── App.tsx                # Main app component
 │   ├── main.tsx               # React entry point
 │   └── vite-env.d.ts          # Vite environment types
+├── server/                    # Production server: serves dist/ and POST /api/translate
+│   ├── handler.ts             # Routing, validation, daily limit, generic errors
+│   ├── together.ts            # Together.ai call (streamed), holds the credential
+│   ├── rateLimiter.ts         # Per-client daily limit
+│   ├── static.ts              # Static files with SPA fallback
+│   └── index.ts               # Reads TOGETHER_* variables and starts listening
+├── scripts/
+│   └── scan-dist-for-secrets.mjs  # CI gate: no credential in dist/
 ├── .env.example               # Environment variable template
 ├── vite.config.ts             # Vite configuration
 ├── tsconfig.json              # TypeScript configuration
@@ -156,113 +164,88 @@ The app uses a comprehensive CSS variable-based design system:
 
 ## 🔒 Configuration & Security
 
-### Environment Variables Classification
+The Together.ai credential never reaches the browser. The production image runs a small Node server (`server/`, no npm dependencies) that serves `dist/` and exposes `POST /api/translate`. The browser only talks to its own origin; the server holds the credential and calls Together.ai.
 
-This project uses **two types of configuration**:
+### Environment Variables
 
-| Variable | Type | Sensitivity | Method |
-|----------|------|-------------|--------|
-| `VITE_TOGETHER_API_KEY` | **Secret** | 🔴 High (credential) | Docker BuildKit secrets |
-| `VITE_TOGETHER_MODEL` | **Config** | 🟢 Low (identifier) | Standard build arg |
+| Variable | Read by | Type | Sensitivity | When it is read |
+|----------|---------|------|-------------|-----------------|
+| `TOGETHER_API_KEY` | server | **Secret** | 🔴 High (credential) | Runtime only |
+| `TOGETHER_MODEL` | server | Config | 🟢 Low (identifier) | Runtime |
+| `VITE_TOGETHER_MODEL` | Vite build | Config | 🟢 Low (identifier) | Build arg. Display only: the model name shown in the footer |
+
+⚠️ **Never give the credential a `VITE_` prefix or a Docker `ARG`.** Vite inlines every `VITE_*` value into `dist/`, which publishes it to every visitor. CI builds with sentinel credentials and runs `pnpm run scan:dist` (`scripts/scan-dist-for-secrets.mjs`), which fails the build if a credential or the provider key prefix shows up in `dist/`.
+
+`VITE_TOGETHER_MODEL` only labels the footer; the model that answers is `TOGETHER_MODEL`. Keep them equal or the footer will name the wrong model.
 
 ### Development (Local)
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root (git-ignored):
 
 ```bash
-# Together.ai API Key (SENSITIVE - never commit!)
-VITE_TOGETHER_API_KEY=your_api_key_here
+# Read by the server (SENSITIVE - never commit!)
+TOGETHER_API_KEY=your_api_key_here
+TOGETHER_MODEL=Qwen/Qwen3.8-Flash
 
-# Together.ai Model (non-sensitive)
-VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
+# Optional: model name shown in the footer
+VITE_TOGETHER_MODEL=Qwen/Qwen3.8-Flash
 ```
 
-⚠️ **Important**: The `.env` file is git-ignored. Your credentials are safe locally.
+Run the API and the front end as two processes:
 
-Run the app:
 ```bash
-pnpm dev  # Vite loads from .env automatically
+pnpm dev:server  # API on http://localhost:8080 (loads .env, restarts on change)
+pnpm dev         # Vite on http://localhost:5173, proxies /api to the API
 ```
 
----
+Vite loads `.env` only at startup, so restart `pnpm dev` after changing `VITE_TOGETHER_MODEL`.
+
+### The `/api/translate` endpoint
+
+`POST /api/translate` with `{"phrase": "Me quedé en blanco."}`:
+
+| Status | When |
+|--------|------|
+| `200` | `{"content": "<four-section Markdown>"}` |
+| `400` | Phrase empty, only whitespace, longer than 500 characters, or the body is not valid JSON. The provider is not called |
+| `429` | The client made 25 requests today (UTC), or the provider is rate limiting. The provider is not called in the first case |
+| `502` | The provider timed out, failed, or answered without text. The body is a generic message and never carries provider text or the credential |
+
+The daily limit is kept in memory per process and identifies the client by the `X-Real-IP` header that Railway's edge sets. It is a safety net for a single-instance demo, not a distributed limiter.
 
 ### Production Deployment
 
 #### Railway (Recommended)
 
-Railway uses **ARG/ENV with Sealed Variables** to handle configuration:
+1. Set these **service variables** in the Railway dashboard:
+   - `TOGETHER_API_KEY`: your API key, marked **sealed** (variable menu → **Seal Variable**)
+   - `TOGETHER_MODEL`: the serverless model, e.g. `Qwen/Qwen3.8-Flash`
+   - `VITE_TOGETHER_MODEL`: the same model name, for the footer
+2. Deploy. The Dockerfile declares an `ARG` only for `VITE_TOGETHER_MODEL`; `TOGETHER_API_KEY` and `TOGETHER_MODEL` reach the container as runtime variables, so changing them needs a redeploy but not a rebuild.
+3. Rotate the Together.ai key when you first adopt this setup. Earlier builds shipped the old `VITE_TOGETHER_API_KEY` value inside `dist/`, so treat it as published. Do not reuse that variable name.
 
-1. **Set environment variables** in Railway dashboard:
-   - `VITE_TOGETHER_API_KEY` (your API key) - **Mark as "sealed"**
-   - `VITE_TOGETHER_MODEL` (your model name)
-
-2. **Use Sealed Variables** for API keys:
-   - In Railway dashboard, click the variable's menu → **"Seal Variable"**
-   - Sealed variables are:
-     - ✅ Available during builds and deployments
-     - ❌ Hidden from Railway UI (shows as `***`)
-     - ❌ Cannot be retrieved via Railway API
-   - Provides extra security even with ARG/ENV approach
-
-3. **Deploy**: Railway automatically:
-   - Injects env vars at build time
-   - Dockerfile uses `ARG` to receive them
-   - Vite injects values into bundle during build
-
-**How it works:**
-```dockerfile
-# Railway injects env vars, Dockerfile receives with ARG
-ARG VITE_TOGETHER_API_KEY
-ARG VITE_TOGETHER_MODEL
-
-# Pass to Vite build
-ENV VITE_TOGETHER_API_KEY=$VITE_TOGETHER_API_KEY
-ENV VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL
-
-RUN pnpm run build
-```
-
-**Security Notes:**
-- Railway images are **private** (not pushed to public registries)
-- Use **sealed variables** for API keys (hidden from UI/API)
-- API key ends up in browser bundle (unavoidable for client-side APIs)
-- For true secret protection, consider adding a backend proxy
+The container starts `node server/index.ts` (Node runs the TypeScript directly) and listens on `PORT` (default `8080`). If `TOGETHER_API_KEY` or `TOGETHER_MODEL` is missing, the site still loads and translations answer `502` until it is set; the reason is written to the logs.
 
 #### Other Platforms (Vercel/Netlify)
 
-For platforms without Docker:
-
-```bash
-# Set in deployment platform dashboard
-VITE_TOGETHER_API_KEY=your_key_here
-VITE_TOGETHER_MODEL=meta-llama/Llama-3.3-70B-Instruct-Turbo
-```
-
-Vite will inject these at build time.
+Static hosts cannot run the server, so the app does not work there as is: `/api/translate` would not exist. Use any platform that runs the Docker image (Railway, Cloud Run, Fly.io, ...).
 
 ---
 
 ### Testing Docker Build Locally
 
-Test the Docker build locally:
-
 ```bash
-# Set environment variables
-export VITE_TOGETHER_API_KEY='your-api-key'
-export VITE_TOGETHER_MODEL='meta-llama/Llama-3.3-70B-Instruct-Turbo'
+# Build the production image (no credential at build time)
+docker build -t translate-and-teach:local .
 
-# Build Docker image
-docker build \
-  --build-arg VITE_TOGETHER_API_KEY="$VITE_TOGETHER_API_KEY" \
-  --build-arg VITE_TOGETHER_MODEL="$VITE_TOGETHER_MODEL" \
-  -t translate-and-teach:local \
-  .
-
-# Run the container
-docker run -p 8080:8080 translate-and-teach:local
+# Run it with the runtime variables
+docker run -p 8080:8080 \
+  -e TOGETHER_API_KEY='your-api-key' \
+  -e TOGETHER_MODEL='Qwen/Qwen3.8-Flash' \
+  translate-and-teach:local
 ```
 
-Visit `http://localhost:8080` to test the app.
+Visit `http://localhost:8080` to test the app. `scripts/test-docker-build.sh` runs the same build with a sentinel credential and checks that it appears nowhere in the image.
 
 **Base image pinning**: every `FROM node:` line in `Dockerfile` (the `builder` and `production` stages) and in `Dockerfile.dev` uses the same pinned string, `node:<version>-alpine3.24@sha256:<digest>`, so development and production run the same Node build and builds are byte-for-byte reproducible. Change the string in all of those lines at once, never in only one. To refresh it, run `docker pull node:<new-version>-alpine3.24`, then `docker inspect --format='{{index .RepoDigests 0}}' node:<new-version>-alpine3.24` to read the digest, and replace the whole string. Dependabot (`docker` ecosystem, `.github/dependabot.yml`) opens bump PRs for these pins; check that its PR changed every `FROM node:` line, `Dockerfile.dev` included, and fix the rest by hand if not.
 
@@ -270,49 +253,22 @@ Visit `http://localhost:8080` to test the app.
 
 ### Adding New Configuration
 
-**For sensitive data (API keys, passwords):**
-1. Add to `.env` for local dev
-2. Add to Railway env vars and **mark as sealed**
-3. Add `ARG` declaration in `Dockerfile`:
-   ```dockerfile
-   ARG YOUR_SECRET_NAME
-   ENV YOUR_SECRET_NAME=$YOUR_SECRET_NAME
-   ```
+**Secrets (API keys, passwords)** are runtime variables of the server:
+1. Add to `.env` for local dev and to the service variables in Railway (sealed)
+2. Read them in `server/index.ts` with `process.env`
+3. Do **not** add an `ARG`/`ENV` for them in the `Dockerfile` and do **not** use a `VITE_` prefix
 
-**For non-sensitive config (URLs, feature flags, model names):**
-1. Add to `.env` for local dev
-2. Add to Railway env vars (no need to seal)
-3. Add `ARG` declaration in `Dockerfile`:
-   ```dockerfile
-   ARG YOUR_CONFIG_NAME
-   ENV YOUR_CONFIG_NAME=$YOUR_CONFIG_NAME
-   ```
-
----
-
-### Security Notes
-
-⚠️ **Client-Side API Keys**: The Together.ai API key is injected into the frontend bundle and **visible in the browser**. This is acceptable because:
-- Together.ai is designed for client-side usage
-- Use Together.ai's rate limiting and key restrictions
-- Railway's images are **private** (not pushed to public registries)
-- Use Railway's **sealed variables** to hide keys from UI/API
-- For true secret protection, consider a backend proxy
-
-✅ **Railway Security Features**:
-- **Sealed Variables**: Hide variable values from Railway UI and API
-- **Private Images**: Docker images stay in Railway's private registry
-- **Build-time Injection**: Variables only exist during build, not persisted
-
-⚠️ **Docker Warning**: You may see `SecretsUsedInArgOrEnv` warning from Docker BuildKit. This is cosmetic - Railway's sealed variables and private images mitigate the risk.
+**Non-sensitive build-time values (display labels)** can be `VITE_*` variables:
+1. Add to `.env` for local dev and to the Railway variables
+2. Add an `ARG`/`ENV` pair in the `builder` stage of the `Dockerfile`
 
 ---
 
 ## 📖 How It Works
 
 1. **User Input**: Enter a Spanish phrase
-2. **API Call**: Send to Together.ai with structured prompt
-3. **LLM Processing**: Llama-3.3-70B generates 4-section response
+2. **API Call**: The browser posts to `/api/translate`; the server calls Together.ai with a structured prompt
+3. **LLM Processing**: The configured model generates the 4-section response
 4. **Parsing**: Extract sections from Markdown response
 5. **Display**: Render results in responsive card grid
 
@@ -327,7 +283,8 @@ Visit `http://localhost:8080` to test the app.
 | Build Tool | Vite 8 |
 | Testing | Vitest 4 + Testing Library |
 | AI Provider | Together.ai |
-| LLM Model | meta-llama/Llama-3.3-70B-Instruct-Turbo |
+| Server | Node (`node:http`, no dependencies), runs TypeScript natively |
+| LLM Model | Any serverless Together.ai model (`TOGETHER_MODEL`) |
 | Styling | CSS3 with CSS Variables |
 | Fonts | Google Fonts (Lato) |
 
@@ -400,7 +357,6 @@ MIT License - see LICENSE file for details
 ## 🙏 Acknowledgments
 
 - **Together.ai** for LLM API
-- **Meta** for Llama-3.3-70B model
 - **Claude Code** for spec-driven development workflow
 
 ---

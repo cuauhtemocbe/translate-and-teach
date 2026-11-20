@@ -1,102 +1,52 @@
 #!/bin/bash
 set -euo pipefail
 
-# Local testing script for Docker builds with BuildKit secrets
-# Tests that secrets are properly mounted and NOT exposed in image layers
+# Local check that the production image carries no provider credential.
+# Builds the image, runs it with a sentinel credential as a RUNTIME variable,
+# and verifies the sentinel appears nowhere in the image or the built site.
 
-echo "🧪 Testing Docker build with BuildKit secrets..."
-echo ""
-
-# Check if VITE_TOGETHER_API_KEY is set
-if [ -z "${VITE_TOGETHER_API_KEY:-}" ]; then
-  echo "❌ ERROR: VITE_TOGETHER_API_KEY environment variable is not set"
-  echo "   Set it with: export VITE_TOGETHER_API_KEY='your-api-key'"
-  exit 1
-fi
-
-# Check if VITE_TOGETHER_MODEL is set
-if [ -z "${VITE_TOGETHER_MODEL:-}" ]; then
-  echo "❌ ERROR: VITE_TOGETHER_MODEL environment variable is not set"
-  echo "   Set it with: export VITE_TOGETHER_MODEL='meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo'"
-  exit 1
-fi
-
+SENTINEL="sentinel-$(date +%s)-not-a-real-key"
 IMAGE_NAME="translate-and-teach:test"
+CONTAINER_NAME="translate-and-teach-credential-check"
 
-echo "📦 Building Docker image with secrets..."
-echo "   Image: $IMAGE_NAME"
-echo "   Model: $VITE_TOGETHER_MODEL"
-echo "   API Key: ${VITE_TOGETHER_API_KEY:0:10}... (truncated)"
+cleanup() {
+  docker rm -f "$CONTAINER_NAME" > /dev/null 2>&1 || true
+}
+trap cleanup EXIT
+
+echo "📦 Building $IMAGE_NAME (no credential at build time)..."
+DOCKER_BUILDKIT=1 docker build -t "$IMAGE_NAME" .
+
 echo ""
-
-# Build with BuildKit and secret mount
-DOCKER_BUILDKIT=1 docker build \
-  --secret id=VITE_TOGETHER_API_KEY,env=VITE_TOGETHER_API_KEY \
-  --build-arg VITE_TOGETHER_MODEL="$VITE_TOGETHER_MODEL" \
-  -t "$IMAGE_NAME" \
-  .
-
-if [ $? -ne 0 ]; then
-  echo "❌ Build failed!"
+echo "🔍 Check 1/3: the sentinel is not in docker history or docker inspect..."
+if docker history "$IMAGE_NAME" --no-trunc | grep -F "$SENTINEL" \
+  || docker inspect "$IMAGE_NAME" | grep -F "$SENTINEL"; then
+  echo "❌ FAILED: credential found in the image metadata"
   exit 1
 fi
+echo "✅ PASSED"
 
 echo ""
-echo "✅ Build succeeded!"
-echo ""
-
-# Security audit: Check docker history for secrets
-echo "🔍 Security Audit 1/3: Checking docker history for exposed secrets..."
-if docker history "$IMAGE_NAME" | grep -i "together"; then
-  echo "⚠️  WARNING: Found 'together' in docker history (checking if it's the API key...)"
-
-  # More specific check for the actual API key value
-  if docker history "$IMAGE_NAME" --no-trunc | grep -F "${VITE_TOGETHER_API_KEY:0:20}"; then
-    echo "❌ FAILED: API key found in docker history!"
-    echo "   This is a security vulnerability - secrets should not appear in image layers."
-    exit 1
-  else
-    echo "✅ PASSED: 'together' found but API key value is NOT exposed"
-  fi
-else
-  echo "✅ PASSED: No secrets found in docker history"
-fi
-
-echo ""
-
-# Security audit: Check docker inspect
-echo "🔍 Security Audit 2/3: Checking docker inspect for exposed secrets..."
-if docker inspect "$IMAGE_NAME" | grep -F "${VITE_TOGETHER_API_KEY:0:20}"; then
-  echo "❌ FAILED: API key found in docker inspect output!"
-  exit 1
-else
-  echo "✅ PASSED: No secrets in docker inspect"
-fi
-
-echo ""
-
-# Verify the built app exists
-echo "🔍 Security Audit 3/3: Verifying build artifacts..."
-docker run --rm "$IMAGE_NAME" ls -la /app/dist/ > /dev/null 2>&1
-if [ $? -eq 0 ]; then
-  echo "✅ PASSED: Build artifacts present in image"
-else
-  echo "❌ FAILED: Build artifacts not found!"
+echo "🔍 Check 2/3: the server starts with runtime variables and rejects an empty phrase..."
+docker run -d --name "$CONTAINER_NAME" -p 18080:8080 \
+  -e TOGETHER_API_KEY="$SENTINEL" \
+  -e TOGETHER_MODEL="ci-model" \
+  "$IMAGE_NAME" > /dev/null
+sleep 3
+STATUS=$(curl -s -o /dev/null -w '%{http_code}' -X POST -d '{"phrase":""}' http://127.0.0.1:18080/api/translate)
+if [ "$STATUS" != "400" ]; then
+  echo "❌ FAILED: expected 400 for an empty phrase, got $STATUS"
   exit 1
 fi
+echo "✅ PASSED"
 
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "🎉 ALL SECURITY CHECKS PASSED!"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "🔍 Check 3/3: the sentinel is not in the built site served by the container..."
+if docker exec "$CONTAINER_NAME" grep -rF "$SENTINEL" /app/dist; then
+  echo "❌ FAILED: credential found in /app/dist"
+  exit 1
+fi
+echo "✅ PASSED"
+
 echo ""
-echo "✅ Docker image built successfully with BuildKit secrets"
-echo "✅ No secrets exposed in docker history"
-echo "✅ No secrets exposed in docker inspect"
-echo "✅ Build artifacts verified"
-echo ""
-echo "Image: $IMAGE_NAME"
-echo ""
-echo "To run the container:"
-echo "  docker run -p 8080:8080 $IMAGE_NAME"
-echo ""
+echo "🎉 ALL CHECKS PASSED: the credential only exists as a runtime variable."

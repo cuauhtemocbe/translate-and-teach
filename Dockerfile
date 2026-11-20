@@ -2,8 +2,10 @@
 FROM node:26.13.0-alpine3.24@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d640c6a881ead0b064ce216 AS builder
 
 # Railway injects environment variables at build time
-# Declare them with ARG to make them available in the build
-ARG VITE_TOGETHER_API_KEY
+# Declare them with ARG to make them available in the build.
+# Only the model label shown in the footer is a build-time value. The provider
+# credential is deliberately NOT declared here: Vite would inline it into dist/
+# and ship it to every visitor. It is a runtime variable of the server below.
 ARG VITE_TOGETHER_MODEL
 
 RUN apk add --no-cache git
@@ -19,10 +21,7 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
-# Pass build args to environment variables for Vite
-# Note: Use Railway's "sealed variables" feature for extra security
-# Sealed variables are hidden from Railway UI/API but available during builds
-ENV VITE_TOGETHER_API_KEY=$VITE_TOGETHER_API_KEY
+# Pass the build arg to the environment for Vite
 ENV VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL
 
 RUN pnpm run typecheck && pnpm run build
@@ -34,26 +33,19 @@ RUN apk add --no-cache curl
 ENV NODE_ENV=production
 ENV PORT=8080
 
-# Install serve BEFORE switching users, from a pinned manifest + lockfile.
-# serve@14.2.6 pins compression 1.8.1 (CVE-2026-87776, fixed in 1.8.2) and no
-# serve release depends on the fix yet, so docker/serve/package.json overrides it.
-# Drop the override once serve ships with compression >= 1.8.2.
-# npm is only needed for this install; drop it so its bundled deps
+# The server (server/) uses only node:http, so the image needs no npm packages and
+# npm itself is not needed at runtime. Drop it so its bundled deps
 # (brace-expansion, undici, ...) don't ship in the production image.
-WORKDIR /opt/serve
-COPY docker/serve/package.json docker/serve/package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts \
-    && ln -s /opt/serve/node_modules/.bin/serve /usr/local/bin/serve \
-    && npm cache clean --force \
-    && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 # Create user without privileges
 RUN adduser -D -u 10001 nodeuser
 
 WORKDIR /app
 
-# Copy built application
+# Copy built application and the server that serves it and proxies /api/translate
 COPY --from=builder --chown=nodeuser:nodeuser /app/dist ./dist
+COPY --from=builder --chown=nodeuser:nodeuser /app/server ./server
 
 USER nodeuser
 
@@ -63,4 +55,6 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/ || exit 1
 
-CMD ["serve", "-s", "dist", "-l", "8080"]
+# Runtime variables read by the server: TOGETHER_API_KEY, TOGETHER_MODEL (set them
+# on the service, never as build args). Node runs the TypeScript directly.
+CMD ["node", "server/index.ts"]

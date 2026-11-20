@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  readonly VITE_TOGETHER_API_KEY: string;
-  readonly VITE_TOGETHER_MODEL: string;
+  /** Model name shown in the footer. Display only: the server picks the model from TOGETHER_MODEL. */
+  readonly VITE_TOGETHER_MODEL?: string;
 }
 
 interface ImportMeta {

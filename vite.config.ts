@@ -12,6 +12,10 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    // In development the API runs as its own process (`pnpm dev:server`)
+    proxy: {
+      '/api': `http://localhost:${process.env.PORT ?? 8080}`,
+    },
   },
   build: {
     target: 'esnext',
@@ -26,11 +30,19 @@ export default defineConfig({
       reporter: ['text', 'lcov', 'html'],
       reportsDirectory: './coverage',
       all: true,
-      include: ['src/**'],
-      exclude: ['src/main.tsx', 'src/types/**', 'src/vite-env.d.ts', 'src/test/**'],
+      include: ['src/**', 'server/**'],
+      exclude: [
+        'src/main.tsx',
+        'src/types/**',
+        'src/vite-env.d.ts',
+        'src/test/**',
+        // Wiring only (reads env, starts listening); every behavior lives in the tested modules
+        'server/index.ts',
+      ],
       thresholds: {
         'src/utils/**': { statements: 90, branches: 90, functions: 90, lines: 90 },
         'src/services/**': { statements: 90, branches: 90, functions: 90, lines: 90 },
+        'server/**': { statements: 90, branches: 90, functions: 90, lines: 90 },
         'src/**': { statements: 80, branches: 80, functions: 80, lines: 80 },
       },
     },

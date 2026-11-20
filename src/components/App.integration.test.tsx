@@ -7,10 +7,10 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
-import * as togetherApi from '../services/togetherApi';
+import * as translateApi from '../services/translateApi';
 
 // Mock the API
-vi.mock('../services/togetherApi', () => ({
+vi.mock('../services/translateApi', () => ({
   translatePhrase: vi.fn(),
 }));
 
@@ -38,7 +38,7 @@ Key points:
 ## Technical Variations
 Variations here`;
 
-      vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(mockResponse);
+      vi.mocked(translateApi.translatePhrase).mockResolvedValueOnce(mockResponse);
 
       const user = userEvent.setup();
       const { container } = render(<App />);
@@ -52,7 +52,7 @@ Variations here`;
       await user.click(button);
 
       // Step 3: Verify API was called
-      expect(togetherApi.translatePhrase).toHaveBeenCalledWith('Hola mundo');
+      expect(translateApi.translatePhrase).toHaveBeenCalledWith('Hola mundo');
 
       // Step 4: Wait for results to appear
       await waitFor(() => {
@@ -90,7 +90,7 @@ Variations here`;
     });
 
     it('should show timer even when API fails', async () => {
-      vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(new Error('Network error'));
+      vi.mocked(translateApi.translatePhrase).mockRejectedValueOnce(new Error('Network error'));
 
       const user = userEvent.setup();
       render(<App />);
@@ -140,7 +140,7 @@ Second learning tip.
 ## Technical Variations
 Second variation example.`;
 
-      vi.mocked(togetherApi.translatePhrase)
+      vi.mocked(translateApi.translatePhrase)
         .mockResolvedValueOnce(firstResponse)
         .mockResolvedValueOnce(secondResponse);
 
@@ -206,7 +206,7 @@ Variations list:
 1. Variation one
 2. Variation two`;
 
-      vi.mocked(togetherApi.translatePhrase).mockResolvedValueOnce(mockResponse);
+      vi.mocked(translateApi.translatePhrase).mockResolvedValueOnce(mockResponse);
 
       const user = userEvent.setup();
       const { container } = render(<App />);
