@@ -24,8 +24,6 @@ The app is a static front end **plus a small Node server** (`server/`) that serv
 cat > .env <<'EOF'
 TOGETHER_API_KEY=your_actual_key_here
 TOGETHER_MODEL=Qwen/Qwen3.8-Flash
-# Optional: model name shown in the footer
-VITE_TOGETHER_MODEL=Qwen/Qwen3.8-Flash
 EOF
 
 # Verify all tests pass
@@ -65,9 +63,8 @@ docker run -p 8080:8080 \
 | Variable | Where | Purpose |
 |----------|-------|---------|
 | `TOGETHER_API_KEY` | runtime | Together.ai credential (secret) |
-| `TOGETHER_MODEL` | runtime | Model that answers |
+| `TOGETHER_MODEL` | runtime and build arg | Model that answers; Vite also inlines it so the footer names it |
 | `PORT` | runtime | Listening port (default `8080`) |
-| `VITE_TOGETHER_MODEL` | build arg | Model name shown in the footer only |
 
 If `TOGETHER_API_KEY` or `TOGETHER_MODEL` is missing, the site still loads and translations answer `502`; the reason is written to the container logs.
 
@@ -77,8 +74,7 @@ If `TOGETHER_API_KEY` or `TOGETHER_MODEL` is missing, the site still loads and t
 2. Set the service variables:
    - `TOGETHER_API_KEY`: your key, marked **sealed** (variable menu → **Seal Variable**)
    - `TOGETHER_MODEL`: the serverless model
-   - `VITE_TOGETHER_MODEL`: the same model name, for the footer
-3. Deploy. Changing `TOGETHER_API_KEY` or `TOGETHER_MODEL` later only needs a redeploy; changing `VITE_TOGETHER_MODEL` needs a rebuild
+3. Deploy. Changing `TOGETHER_API_KEY` only needs a redeploy; changing `TOGETHER_MODEL` rebuilds the image so the footer follows, which Railway does on any variable change
 4. Verify with a real phrase (see the checklist below)
 
 ### Other Container Platforms

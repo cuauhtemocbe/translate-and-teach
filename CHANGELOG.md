@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - The browser no longer calls Together.ai: it posts to `/api/translate` on its own origin. Provider failures show "The translation service is unavailable. Try again later." instead of raw `API error` text, and replies are streamed so models that require streaming (e.g. `Qwen/Qwen3.8-Flash`) work
-- The footer names the model from `VITE_TOGETHER_MODEL` instead of a hardcoded one, which now only labels the footer
+- The footer names the model from `TOGETHER_MODEL`, the same variable the server uses, instead of a hardcoded one. Vite exposes only that name (`envPrefix`), never the credential, and the image declares a build `ARG` for it
 - Node base image pinned by tag and digest (`node:<version>-alpine3.24@sha256:...`), the same string in every `FROM node:` line of `Dockerfile` and `Dockerfile.dev`, for reproducible builds and matching dev/prod runtimes
 - `CLAUDE.md` rewritten to document the project's real architecture and validation layers, replacing the generic template it was bootstrapped from
 

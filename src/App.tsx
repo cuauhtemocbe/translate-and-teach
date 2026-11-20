@@ -27,7 +27,7 @@ export function App() {
   const { theme, toggleTheme } = useTheme();
 
   // Credit the configured model (without its provider prefix) so the footer never goes stale
-  const modelName = import.meta.env.VITE_TOGETHER_MODEL?.trim().split('/').pop();
+  const modelName = import.meta.env.TOGETHER_MODEL?.trim().split('/').pop();
 
   // Focus results when they appear
   useEffect(() => {

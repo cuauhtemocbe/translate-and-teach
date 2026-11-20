@@ -171,12 +171,11 @@ The Together.ai credential never reaches the browser. The production image runs 
 | Variable | Read by | Type | Sensitivity | When it is read |
 |----------|---------|------|-------------|-----------------|
 | `TOGETHER_API_KEY` | server | **Secret** | 🔴 High (credential) | Runtime only |
-| `TOGETHER_MODEL` | server | Config | 🟢 Low (identifier) | Runtime |
-| `VITE_TOGETHER_MODEL` | Vite build | Config | 🟢 Low (identifier) | Build arg. Display only: the model name shown in the footer |
+| `TOGETHER_MODEL` | server and Vite build | Config | 🟢 Low (identifier) | Runtime for the server; also a build arg, so the footer can name the model |
 
-⚠️ **Never give the credential a `VITE_` prefix or a Docker `ARG`.** Vite inlines every `VITE_*` value into `dist/`, which publishes it to every visitor. CI builds with sentinel credentials and runs `pnpm run scan:dist` (`scripts/scan-dist-for-secrets.mjs`), which fails the build if a credential or the provider key prefix shows up in `dist/`.
+⚠️ **Never give the credential a `VITE_` prefix or a Docker `ARG`, and never widen `envPrefix` in `vite.config.ts` beyond `['VITE_', 'TOGETHER_MODEL']`.** Vite inlines every variable matching `envPrefix` into `dist/`, which publishes it to every visitor. CI builds with sentinel credentials and runs `pnpm run scan:dist` (`scripts/scan-dist-for-secrets.mjs`), which fails the build if a credential or the provider key prefix shows up in `dist/`.
 
-`VITE_TOGETHER_MODEL` only labels the footer; the model that answers is `TOGETHER_MODEL`. Keep them equal or the footer will name the wrong model.
+`TOGETHER_MODEL` is the single source for the model: the server reads it at runtime, and Vite inlines it at build time so the footer names it. Changing it needs a rebuild for the footer to follow, which Railway does on every variable change.
 
 ### Development (Local)
 
@@ -186,9 +185,6 @@ Create a `.env` file in the project root (git-ignored):
 # Read by the server (SENSITIVE - never commit!)
 TOGETHER_API_KEY=your_api_key_here
 TOGETHER_MODEL=Qwen/Qwen3.8-Flash
-
-# Optional: model name shown in the footer
-VITE_TOGETHER_MODEL=Qwen/Qwen3.8-Flash
 ```
 
 Run the API and the front end as two processes:
@@ -198,7 +194,7 @@ pnpm dev:server  # API on http://localhost:8080 (loads .env, restarts on change)
 pnpm dev         # Vite on http://localhost:5173, proxies /api to the API
 ```
 
-Vite loads `.env` only at startup, so restart `pnpm dev` after changing `VITE_TOGETHER_MODEL`.
+Vite loads `.env` only at startup, so restart `pnpm dev` after changing `TOGETHER_MODEL`.
 
 ### The `/api/translate` endpoint
 
@@ -220,8 +216,7 @@ The daily limit is kept in memory per process and identifies the client by the `
 1. Set these **service variables** in the Railway dashboard:
    - `TOGETHER_API_KEY`: your API key, marked **sealed** (variable menu → **Seal Variable**)
    - `TOGETHER_MODEL`: the serverless model, e.g. `Qwen/Qwen3.8-Flash`
-   - `VITE_TOGETHER_MODEL`: the same model name, for the footer
-2. Deploy. The Dockerfile declares an `ARG` only for `VITE_TOGETHER_MODEL`; `TOGETHER_API_KEY` and `TOGETHER_MODEL` reach the container as runtime variables, so changing them needs a redeploy but not a rebuild.
+2. Deploy. The Dockerfile declares an `ARG` only for `TOGETHER_MODEL` (the footer shows it); `TOGETHER_API_KEY` is never a build arg and reaches the container only as a runtime variable.
 3. Rotate the Together.ai key when you first adopt this setup. Earlier builds shipped the old `VITE_TOGETHER_API_KEY` value inside `dist/`, so treat it as published. Do not reuse that variable name.
 
 The container starts `node server/index.ts` (Node runs the TypeScript directly) and listens on `PORT` (default `8080`). If `TOGETHER_API_KEY` or `TOGETHER_MODEL` is missing, the site still loads and translations answer `502` until it is set; the reason is written to the logs.

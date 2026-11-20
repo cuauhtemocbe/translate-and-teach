@@ -6,7 +6,7 @@ FROM node:26.13.0-alpine3.24@sha256:8996bb5821d62a8fd9bb27c1cb07462f3fdce6e47d64
 # Only the model label shown in the footer is a build-time value. The provider
 # credential is deliberately NOT declared here: Vite would inline it into dist/
 # and ship it to every visitor. It is a runtime variable of the server below.
-ARG VITE_TOGETHER_MODEL
+ARG TOGETHER_MODEL
 
 RUN apk add --no-cache git
 ENV PNPM_HOME="/root/.local/share/pnpm"
@@ -22,7 +22,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Pass the build arg to the environment for Vite
-ENV VITE_TOGETHER_MODEL=$VITE_TOGETHER_MODEL
+ENV TOGETHER_MODEL=$TOGETHER_MODEL
 
 RUN pnpm run typecheck && pnpm run build
 

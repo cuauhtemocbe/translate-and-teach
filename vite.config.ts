@@ -4,6 +4,10 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  // Vite inlines into the browser bundle every variable whose name starts with one
+  // of these. TOGETHER_MODEL is there because the footer names the model. Never
+  // widen it to 'TOGETHER_': that would also publish TOGETHER_API_KEY.
+  envPrefix: ['VITE_', 'TOGETHER_MODEL'],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

@@ -27,7 +27,7 @@ describe('App', () => {
 
   describe('footer model credit', () => {
     it('should name the configured model without its provider prefix', () => {
-      vi.stubEnv('VITE_TOGETHER_MODEL', 'Qwen/Qwen3.8-Flash');
+      vi.stubEnv('TOGETHER_MODEL', 'Qwen/Qwen3.8-Flash');
 
       render(<App />);
 
@@ -37,7 +37,7 @@ describe('App', () => {
     });
 
     it('should name a model that has no provider prefix as is', () => {
-      vi.stubEnv('VITE_TOGETHER_MODEL', 'custom-model-name');
+      vi.stubEnv('TOGETHER_MODEL', 'custom-model-name');
 
       render(<App />);
 
@@ -45,7 +45,7 @@ describe('App', () => {
     });
 
     it.each([undefined, '', '   '])('should omit the model when it is %j', (model) => {
-      vi.stubEnv('VITE_TOGETHER_MODEL', model);
+      vi.stubEnv('TOGETHER_MODEL', model);
 
       render(<App />);
 
