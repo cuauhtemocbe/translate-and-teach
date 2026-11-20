@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '../App';
 import * as togetherApi from '../services/togetherApi';
 
@@ -14,11 +14,45 @@ describe('App', () => {
     vi.clearAllMocks();
   });
 
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it('should render hero and input section', () => {
     render(<App />);
 
     expect(screen.getByText('English Pro')).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Escribe una frase/i)).toBeInTheDocument();
+  });
+
+  describe('footer model credit', () => {
+    it('should name the configured model without its provider prefix', () => {
+      vi.stubEnv('VITE_TOGETHER_MODEL', 'Qwen/Qwen3.8-Flash');
+
+      render(<App />);
+
+      const footer = screen.getByRole('contentinfo');
+      expect(footer).toHaveTextContent('Powered by Together.ai using Qwen3.8-Flash');
+      expect(footer).not.toHaveTextContent('Llama');
+    });
+
+    it('should name a model that has no provider prefix as is', () => {
+      vi.stubEnv('VITE_TOGETHER_MODEL', 'custom-model-name');
+
+      render(<App />);
+
+      expect(screen.getByRole('contentinfo')).toHaveTextContent('using custom-model-name');
+    });
+
+    it.each([undefined, '', '   '])('should omit the model when it is %j', (model) => {
+      vi.stubEnv('VITE_TOGETHER_MODEL', model);
+
+      render(<App />);
+
+      const footer = screen.getByRole('contentinfo');
+      expect(footer).toHaveTextContent('Powered by Together.ai');
+      expect(footer).not.toHaveTextContent('using');
+    });
   });
 
   it('should handle successful translation flow', async () => {
@@ -56,9 +90,9 @@ Hi, Hey`;
     expect(screen.getByText('Simple greeting')).toBeInTheDocument();
   });
 
-  it('should display error message on API failure', async () => {
+  it('should display a readable error message on API failure', async () => {
     vi.mocked(togetherApi.translatePhrase).mockRejectedValueOnce(
-      new Error('API error: 500 Internal Server Error'),
+      new Error('The translation service is unavailable. Try again later.'),
     );
 
     const user = userEvent.setup();
@@ -71,8 +105,12 @@ Hi, Hey`;
     await user.click(button);
 
     await waitFor(() => {
-      expect(screen.getByText(/API error/i)).toBeInTheDocument();
+      expect(
+        screen.getByText('The translation service is unavailable. Try again later.'),
+      ).toBeInTheDocument();
     });
+
+    expect(screen.queryByText(/API error/i)).not.toBeInTheDocument();
 
     // Results should not be shown
     expect(screen.queryByText('Principal Translation')).not.toBeInTheDocument();

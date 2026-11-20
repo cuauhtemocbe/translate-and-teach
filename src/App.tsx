@@ -26,6 +26,9 @@ export function App() {
   const completionTimeoutRef = useRef<number | null>(null);
   const { theme, toggleTheme } = useTheme();
 
+  // Credit the configured model (without its provider prefix) so the footer never goes stale
+  const modelName = import.meta.env.VITE_TOGETHER_MODEL?.trim().split('/').pop();
+
   // Focus results when they appear
   useEffect(() => {
     if (results && resultsRef.current) {
@@ -174,8 +177,8 @@ export function App() {
               aria-label="Together.ai (opens in new tab)"
             >
               Together.ai
-            </a>{' '}
-            using Llama-3.3-70B
+            </a>
+            {modelName ? ` using ${modelName}` : ''}
           </p>
         </div>
       </footer>

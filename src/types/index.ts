@@ -37,6 +37,20 @@ export interface TogetherAIResponse {
 }
 
 /**
+ * One server-sent event of a streamed Together.ai chat completion.
+ * Reasoning models also send their thinking trace in `reasoning` or
+ * `reasoning_content`; only `content` is part of the answer.
+ */
+export interface TogetherAIStreamChunk {
+  choices?: Array<{
+    delta?: {
+      content?: string | null;
+    };
+    finish_reason?: string | null;
+  }>;
+}
+
+/**
  * Card variant types for styling
  */
 export type CardVariant = 'translation' | 'grammar' | 'tips' | 'variations';
